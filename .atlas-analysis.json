@@ -1,0 +1,103 @@
+{
+  "projectType": "general",
+  "projectName": "Natro Macro",
+  "projectDescription": "An open-source automation macro for Bee Swarm Simulator written in AutoHotkey",
+  "theme": "almond",
+  "primaryColor": "#faa125",
+  "lightColor": "#ffd480",
+  "darkColor": "#d67a00",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "installation",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Core Features",
+            "pages": [
+              "features/gathering",
+              "features/quests",
+              "features/planters",
+              "features/boosting"
+            ]
+          },
+          {
+            "group": "Configuration",
+            "pages": [
+              "configuration/settings",
+              "configuration/patterns",
+              "configuration/paths",
+              "configuration/hotkeys"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/memory-match",
+              "guides/bosses",
+              "guides/dispensers",
+              "guides/discord-integration"
+            ]
+          },
+          {
+            "group": "Advanced",
+            "pages": [
+              "advanced/custom-patterns",
+              "advanced/custom-paths",
+              "advanced/troubleshooting"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Reference",
+        "groups": [
+          {
+            "group": "AutoHotkey Scripts",
+            "pages": [
+              "reference/main-script",
+              "reference/background-script",
+              "reference/library-functions"
+            ]
+          },
+          {
+            "group": "Fields & Locations",
+            "pages": [
+              "reference/fields",
+              "reference/quest-givers",
+              "reference/machines"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Automated gathering across 17 different fields",
+    "Quest automation for 6 quest givers",
+    "Planter management system",
+    "Boss and mob farming",
+    "Field boost management",
+    "Custom patterns and paths",
+    "Memory Match automation",
+    "Discord integration"
+  ],
+  "publicApiSurface": [
+    "natro_macro.ahk - Main macro entry point",
+    "background.ahk - Background monitoring script",
+    "Heartbeat.ahk - Process monitoring",
+    "PlanterTimers.ahk - Planter timer management",
+    "StatMonitor.ahk - Statistics tracking",
+    "Status.ahk - Status display",
+    "Pattern system - Custom gathering patterns",
+    "Path system - Navigation paths for fields and locations",
+    "START.bat - Launcher script"
+  ]
+}

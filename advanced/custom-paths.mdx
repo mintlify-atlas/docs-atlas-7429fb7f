@@ -1,0 +1,412 @@
+---
+title: Creating Custom Paths
+description: Learn how to create and import custom navigation paths for Natro Macro
+---
+
+Custom paths define how your character navigates between locations (fields, questgivers, machines). This guide covers path types, naming conventions, and creation.
+
+## Path Types & Naming
+
+Paths follow a strict naming convention: `<type>-<location>.ahk`
+
+### Path Type Prefixes
+
+From `natro_macro.ahk:309-321`, these are the valid path types:
+
+| Prefix | Full Name | Purpose | Example |
+|--------|-----------|---------|----------|
+| `gtb` | Go To Booster | Navigate to field boosters | `gtb-blue.ahk` |
+| `gtc` | Go To Collect | Navigate to machines/collectibles | `gtc-honeydis.ahk` |
+| `gtf` | Go To Field | Navigate to gathering fields | `gtf-sunflower.ahk` |
+| `gtp` | Go To Planter | Navigate to planter locations | `gtp-bamboo.ahk` |
+| `gtq` | Go To Questgiver | Navigate to quest NPCs | `gtq-bucko.ahk` |
+| `wf` | Walk From | Return from field to hive | `wf-strawberry.ahk` |
+
+### Valid Locations
+
+<Accordion title="Fields (gtf, gtp, wf)">
+```
+bamboo, blueflower, cactus, clover, coconut, dandelion, 
+mountaintop, mushroom, pepper, pinetree, pineapple, 
+pumpkin, rose, spider, strawberry, stump, sunflower
+```
+</Accordion>
+
+<Accordion title="Boosters (gtb)">
+```
+blue, mountain, red
+```
+</Accordion>
+
+<Accordion title="Questgivers (gtq)">
+```
+black, brown, bucko, honey, polar, riley
+```
+</Accordion>
+
+<Accordion title="Machines (gtc)">
+```
+// Core Machines
+clock, antpass, robopass, blender, windshrine
+
+// Dispensers
+honeydis, treatdis, blueberrydis, strawberrydis, 
+coconutdis, gluedis, royaljellydis
+
+// Beesmas Event
+stockings, wreath, feast, gingerbread, snowmachine, 
+candles, samovar, lidart, gummybeacon
+
+// Special
+honeylb, honeystorm, stickerstack, stickerprinter,
+normalmm, megamm, nightmm, extrememm, wintermm, rbpdelevel
+```
+</Accordion>
+
+## Path Structure
+
+Paths use movement and camera functions to navigate from your current location to the target.
+
+### Movement Functions
+
+<CodeGroup>
+```ahk nm_Walk
+; Primary movement function
+nm_Walk(distance, direction, diagonal?)
+
+; Examples:
+nm_Walk(14, BackKey)           ; Walk backward 14 units
+nm_Walk(25, RightKey)          ; Walk right 25 units  
+nm_Walk(15, FwdKey, RightKey)  ; Walk forward-right diagonal 15 units
+```
+
+```ahk nm_gotoramp
+; Navigate to the red ramp from hive
+nm_gotoramp()
+
+; Example usage:
+nm_gotoramp()
+nm_Walk(10, FwdKey)
+```
+
+```ahk nm_gotocannon
+; Navigate to the yellow cannon
+nm_gotocannon()
+
+; Example usage:
+nm_gotocannon()
+send "{e down}"
+HyperSleep(100)
+send "{e up}"
+```
+</CodeGroup>
+
+### Camera Functions
+
+```ahk
+; Rotate camera
+send "{" RotLeft " 2}"   ; Rotate left 2 times
+send "{" RotRight " 4}"  ; Rotate right 4 times
+
+; Advanced camera rotation
+nm_CameraRotation(direction, times)
+```
+
+### Direction Keys
+
+These variables are available in all paths:
+
+- `FwdKey` - Move forward
+- `BackKey` - Move backward
+- `LeftKey` - Move left  
+- `RightKey` - Move right
+- `RotLeft` - Rotate camera left
+- `RotRight` - Rotate camera right
+
+## Example Paths
+
+<Accordion title="Go To Field - Sunflower (Planter)">
+```ahk
+nm_gotoramp()
+nm_Walk(14, BackKey)
+send "{" RotRight " 1}"
+nm_Walk(25, RightKey)
+nm_Walk(15, FwdKey)
+nm_Walk(9, BackKey)
+send "{" RotRight " 1}"
+```
+
+From `paths/gtp-sunflower.ahk:1-8` - This path:
+1. Goes to the red ramp
+2. Walks backward to position
+3. Rotates camera right once
+4. Walks right to the field entrance
+5. Walks forward into the field
+6. Positions optimally for planter placement
+7. Final camera rotation for field orientation
+</Accordion>
+
+<Accordion title="Go To Field - Bamboo (Cannon Method)">
+```ahk
+if (MoveMethod = "Cannon") {
+    nm_gotoramp()
+    nm_gotocannon()
+    send "{e down}"
+    HyperSleep(100)
+    send "{e up}{" LeftKey " down}"
+    HyperSleep(1250)
+    send "{space 2}"
+    HyperSleep(1000)
+    send "{" LeftKey " up}"
+    HyperSleep(1200)
+    send "{space}{" RotLeft " 2}"
+    Sleep 2000
+} else {
+    nm_gotoramp()
+    nm_Walk(67.5, BackKey, LeftKey)
+    send "{" RotRight " 4}"
+    nm_Walk(23.5, FwdKey)
+    nm_Walk(31.5, FwdKey, RightKey)
+    nm_Walk(10, RightKey)
+    send "{" RotRight " 2}"
+}
+```
+
+From `paths/gtf-bamboo.ahk:1-25` - This demonstrates:
+- Conditional logic based on `MoveMethod` setting
+- Cannon usage with timing (`HyperSleep`)
+- Alternative walking route
+- Diagonal movement (`FwdKey, RightKey`)
+</Accordion>
+
+<Accordion title="Walk From - Honey Dispenser">
+```ahk
+nm_Walk(1, FwdKey)
+nm_Walk(9.2*(7-HiveSlot) + 10, LeftKey)
+nm_Walk(2, BackKey, RightKey)
+nm_Walk(2, BackKey)
+```
+
+From `paths/gtc-honeydis.ahk:1-5` - Shows:
+- Calculated distance based on `HiveSlot` variable
+- Formula: `9.2 * (7 - HiveSlot) + 10` adjusts for hive position
+- Diagonal movement for final positioning
+</Accordion>
+
+## Import & Validation
+
+Paths are automatically imported from the `paths/` folder on macro startup.
+
+### Import Process
+
+From `natro_macro.ahk:307-352`, the import function:
+
+```ahk
+nm_importPaths()
+{
+    static path_names := Map(
+        "gtb", ["blue", "mountain", "red"],
+        "gtc", ["clock", "antpass", "robopass", "honeydis", ...],
+        "gtf", ["bamboo", "blueflower", "cactus", ...],
+        "gtp", ["bamboo", "blueflower", "cactus", ...],
+        "gtq", ["black", "brown", "bucko", "honey", "polar", "riley"],
+        "wf",  ["bamboo", "blueflower", "cactus", ...]
+    )
+
+    global paths := Map()
+    paths.CaseSense := 0
+
+    for k, list in path_names
+    {
+        for v in list
+        {
+            try {
+                file := FileOpen(A_WorkingDir "\paths\" k "-" v ".ahk", "r")
+                paths[k][v] := file.Read()
+                file.Close()
+                
+                // Check for deprecated syntax
+                if regexMatch(paths[k][v], "im)paths\[")
+                    MsgBox "Path seems to be deprecated!"
+            }
+            catch
+                MsgBox "Could not find the '" k '-' v "' path!"
+        }
+    }
+}
+```
+
+### Error Messages
+
+<Warning>
+**Path Deprecated Error:**
+```
+Path 'gtf-bamboo' seems to be deprecated!
+This means the macro will NOT work correctly!
+Check for an updated version of the path or restore the default path
+```
+
+Your path uses old v1 syntax. Update to v2 or restore the default.
+</Warning>
+
+<Warning>
+**Path Missing Error:**
+```
+Could not find the 'gtf-bamboo' path!
+This means the macro will NOT work correctly!
+Make sure the path exists in the 'paths' folder and redownload if it doesn't!
+```
+
+The path file is missing from the paths folder. Restore from backup or re-download.
+</Warning>
+
+## Available Variables
+
+These global variables are accessible in path files:
+
+| Variable | Type | Description |
+|----------|------|-------------|
+| `MoveMethod` | String | "Cannon" or "Walk" - movement preference |
+| `HiveSlot` | Number | Your hive slot number (1-6) |
+| `FieldName` | String | Current target field name |
+
+## Creating Custom Paths
+
+### Step-by-Step Process
+
+1. **Record Your Route**
+   - Manually walk the route in-game
+   - Note each movement direction and approximate distance
+   - Record camera rotations needed
+
+2. **Create Path File**
+   - Name: `<type>-<location>.ahk`
+   - Start from a known position (usually hive or field)
+   - Use `nm_Walk()` for each movement segment
+
+3. **Test & Refine**
+   - Test in-game with macro
+   - Adjust distances (units are approximate)
+   - Fine-tune camera rotations
+   - Test from different starting conditions
+
+4. **Optimize**
+   - Remove unnecessary movements
+   - Combine diagonal movements where possible
+   - Add conditional logic for cannons if beneficial
+
+### Distance Reference
+
+- 1 unit ≈ Small character step
+- 10 units ≈ Medium distance
+- 25 units ≈ Cross a field
+- 50+ units ≈ Long distance travel
+
+<Info>
+Distances are affected by your `MoveSpeedNum` setting. Test with your configured speed!
+</Info>
+
+## Common Issues
+
+<Accordion title="Character ends up in wrong location">
+**Cause:** Incorrect distances or missing camera rotations
+
+**Solution:**
+1. Break path into smaller segments
+2. Test each segment individually  
+3. Verify camera orientation at each step
+4. Check for obstacles in the path
+5. Adjust distances incrementally (±1-2 units)
+</Accordion>
+
+<Accordion title="Path works sometimes but not always">
+**Cause:** Starting position varies or lag affects timing
+
+**Solution:**
+1. Add a "reset" position at path start (e.g., `nm_gotoramp()`)
+2. Use `HyperSleep()` after movements that need settling time
+3. Avoid paths that require precise frame-perfect timing
+4. Test with different server latencies
+</Accordion>
+
+<Accordion title="Cannon path fails">
+**Cause:** Timing issues or cannon aim problems
+
+**Solution:**
+1. Increase `HyperSleep()` durations between cannon actions
+2. Test cannon direction keys (Left/Right) duration
+3. Verify `{space}` timing for cannon launch
+4. Consider adding fallback `else` clause with walk path
+</Accordion>
+
+## File Location
+
+```
+Natro Macro/
+└── paths/
+    ├── gtf-sunflower.ahk
+    ├── gtf-bamboo.ahk
+    ├── gtc-honeydis.ahk
+    └── wf-strawberry.ahk
+```
+
+Paths must be in the `paths/` folder with correct naming to be imported.
+
+## Testing Checklist
+
+- [ ] Path works from hive
+- [ ] Path works after reconnect
+- [ ] Path works with Cannon method (if applicable)
+- [ ] Path works with Walk method
+- [ ] Character faces correct direction at end
+- [ ] No obstacles block the route
+- [ ] Works on different servers (lag test)
+- [ ] Consistent across multiple runs
+
+## Best Practices
+
+<Info>
+- Start paths from consistent locations (`nm_gotoramp()` is common)
+- Use comments to explain complex sections
+- Keep movements simple and direct
+- Test both Cannon and Walk methods if path supports both
+- Provide alternative routes if primary path is unreliable
+- Consider server lag in timing-critical sections
+</Info>
+
+## Advanced Techniques
+
+### Conditional Logic
+
+```ahk
+if (MoveMethod = "Cannon") {
+    ; Cannon route
+} else {
+    ; Walk route  
+}
+```
+
+### Hive Slot Adjustment
+
+```ahk
+; Distance varies by hive slot (1-6)
+nm_Walk(9.2*(7-HiveSlot) + 10, LeftKey)
+```
+
+### Pre-Movement Positioning
+
+```ahk
+nm_gotoramp()  ; Reset to known position
+nm_Walk(5, FwdKey)  ; Small adjustment
+; Continue with main path...
+```
+
+## Resources
+
+- [Default Paths Repository](https://github.com/NatroTeam/Paths-Patterns)
+- [Discord #paths Channel](https://discord.gg/natromacro)
+- [AutoHotkey v2 Docs](https://www.autohotkey.com/docs/v2/)
+
+<Info>
+Share your custom paths on Discord! The community can help optimize and verify paths work for all users.
+</Info>

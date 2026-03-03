@@ -1,0 +1,295 @@
+---
+title: Creating Custom Patterns
+description: Learn how to create and import custom gathering patterns for Natro Macro
+---
+
+Custom patterns allow you to define how your character moves while gathering in fields. This guide covers pattern structure, validation, and security considerations.
+
+## Pattern Structure
+
+Patterns are written in AutoHotkey v2 and define movement sequences using specific functions and variables.
+
+### Required Functions
+
+Every pattern must use these core movement functions:
+
+<CodeGroup>
+```ahk Walk Function
+; Walks for a specified distance
+Walk(param1, param2?)
+
+; Example:
+Walk(11 * size)  ; Walk 11 units scaled by size
+```
+
+```ahk HyperSleep Function
+; Precise sleep for synchronization
+HyperSleep(param1)
+
+; Example:
+HyperSleep(100)  ; Sleep for 100ms
+```
+
+```ahk nm_Walk Function
+; Advanced walk with direction keys
+nm_Walk(param1, param2, param3?)
+
+; Example:
+nm_Walk(14, BackKey)  ; Walk 14 units backward
+```
+</CodeGroup>
+
+### Pattern Variables
+
+These variables are available in every pattern:
+
+| Variable | Type | Description |
+|----------|------|-------------|
+| `size` | Number | Pattern size multiplier (default: 1) |
+| `reps` | Number | Number of repetitions (default: 1) |
+| `facingcorner` | Number | Initial facing direction (0 or 1) |
+| `TCFBKey` | String | "Toward Center" Forward/Back key |
+| `TCLRKey` | String | "Toward Center" Left/Right key |
+| `AFCFBKey` | String | "Away From Center" Forward/Back key |
+| `AFCLRKey` | String | "Away From Center" Left/Right key |
+
+### Movement Key Variables
+
+These directional keys are predefined:
+
+- `FwdKey` - Forward movement
+- `BackKey` - Backward movement  
+- `LeftKey` - Left movement
+- `RightKey` - Right movement
+- `RotLeft` - Rotate camera left
+- `RotRight` - Rotate camera right
+
+## Example Patterns
+
+<Accordion title="Simple Lines Pattern">
+```ahk
+loop reps {
+    send "{" TCFBKey " down}"
+    Walk(11 * size)
+    send "{" TCFBKey " up}{" AFCLRKey " down}"
+    Walk(1)
+    send "{" AFCLRKey " up}{" AFCFBKey " down}"
+    Walk(11 * size)
+    send "{" AFCFBKey " up}{" AFCLRKey " down}"
+    Walk(1)
+    send "{" AFCLRKey " up}"
+}
+```
+
+This pattern creates a simple line movement pattern that:
+1. Walks toward center for 11 units (scaled by size)
+2. Moves left/right 1 unit
+3. Walks away from center for 11 units
+4. Moves left/right 1 unit
+5. Repeats based on `reps` value
+</Accordion>
+
+<Accordion title="Squares Pattern">
+```ahk
+loop reps {
+    send "{" TCFBKey " down}"
+    Walk(5 * size + A_Index)
+    send "{" TCFBKey " up}{" TCLRKey " down}"
+    Walk(5 * size + A_Index)
+    send "{" TCLRKey " up}{" AFCFBKey " down}"
+    Walk(5 * size + A_Index)
+    send "{" AFCFBKey " up}{" AFCLRKey " down}"
+    Walk(5 * size + A_Index)
+    send "{" AFCLRKey " up}"
+}
+```
+
+This creates expanding squares using `A_Index` to increase size each loop.
+</Accordion>
+
+<Accordion title="Stationary Pattern">
+```ahk
+Sleep 10000
+```
+
+The simplest pattern - stays in one place for 10 seconds.
+</Accordion>
+
+## Import Process
+
+When you add a pattern file to the `patterns/` folder, Natro Macro automatically:
+
+1. **Validates Syntax** - Checks for AutoHotkey v2 syntax errors
+2. **Security Check** - Warns about untrusted patterns
+3. **Compiles** - Validates the pattern can execute
+4. **Imports** - Makes it available in the GUI
+
+### Validation Code
+
+From `natro_macro.ahk:172-303`, the import function:
+
+```ahk
+nm_importPatterns()
+{
+    global patterns := Map()
+    patterns.CaseSense := 0
+    global patternlist := []
+
+    ; Check each .ahk file in patterns folder
+    Loop Files A_WorkingDir "\patterns\*.ahk"
+    {
+        file := FileOpen(A_LoopFilePath, "r")
+        pattern := file.Read()
+        file.Close()
+        
+        ; Validate pattern can execute
+        script := '
+            #NoTrayIcon
+            #SingleInstance Off
+            #Warn All, StdOut
+            
+            ' nm_KeyVars() '
+            
+            size:=1, reps:=1, facingcorner:=0
+            Walk(param1, param2?) => ""
+            HyperSleep(param1) => ""
+            nm_Walk(param1, param2, param3?) => ""
+            
+            ' pattern '
+        '
+        
+        exec := ComObject("WScript.Shell").Exec('"' exe_path64 '" /script /Validate /ErrorStdOut *')
+        exec.StdIn.Write(script)
+        exec.StdIn.Close()
+        
+        if (stdout := exec.StdOut.ReadAll())
+        {
+            MsgBox "Unable to import '" pattern_name "' pattern!\n" stdout
+            continue
+        }
+    }
+}
+```
+
+## Security Warnings
+
+<Warning>
+**CRITICAL: Pattern files can execute ANY AutoHotkey code, including malicious code!**
+
+Only download patterns from trusted sources:
+- Official Discord server (#patterns channel)
+- https://github.com/NatroTeam/Paths-Patterns
+- Verified community creators
+
+NEVER download patterns from:
+- Random Discord DMs
+- Untrusted websites
+- Unknown users
+</Warning>
+
+### Security Dialog
+
+When importing a new pattern, you'll see this warning (from `natro_macro.ahk:214-237`):
+
+```
+IMPORTANT!! READ THIS WHOLE MESSAGE
+
+Pattern files can execute any AutoHotkey code, including potentially malicious code.
+You should only run patterns from sources you trust.
+
+We provide a few sources for trusted pattern downloads, including:
+
+- Our discord server, in the #patterns channel  
+- https://github.com/NatroTeam/Paths-Patterns, a collection of verified patterns
+
+We review every pattern or path submitted to these sources, so you can be 
+sure that they are 100% safe.
+
+HOWEVER, you should not download a pattern from a stranger telling you to 
+test out their pattern. If all else fails, just download it from the sources above.
+```
+
+You must confirm you trust the pattern before it will import.
+
+## Deprecated Pattern Warning
+
+If you see this error:
+
+```
+Pattern 'filename.ahk' seems to be deprecated!
+This means the pattern will NOT work!
+Check for an updated version of the pattern
+or ask the creator to update it
+```
+
+Your pattern uses old AutoHotkey v1 syntax like `patterns[`. Update to v2 syntax or download the latest version.
+
+## Common Issues
+
+<Accordion title="Pattern not appearing in GUI">
+**Cause:** Syntax error or validation failure
+
+**Solution:**
+1. Check the error message when macro loads
+2. Verify your pattern uses correct function names
+3. Test pattern syntax in a text editor with AHK v2 syntax checking
+4. Remove and re-add the pattern file
+</Accordion>
+
+<Accordion title="Character moves incorrectly">
+**Cause:** Wrong key variables or movement logic
+
+**Solution:**
+1. Test with `size=1` and `reps=1` first
+2. Verify you're using `TCFBKey`/`AFCFBKey` correctly
+3. Check `Walk()` distances are reasonable (11 units ≈ full field width)
+4. Add `HyperSleep()` between movements if needed
+</Accordion>
+
+<Accordion title="Security warning every restart">
+**Cause:** Pattern hash not in verified list
+
+**Solution:** This is normal for custom patterns. The warning prevents malicious auto-imports. Click "Yes" if you trust your pattern.
+</Accordion>
+
+## Testing Your Pattern
+
+1. **Start Small** - Use `size=1` and `reps=1`
+2. **Visual Test** - Watch the character movement in-game
+3. **Field Coverage** - Check pattern covers desired area
+4. **Edge Cases** - Test with different field sizes
+5. **Performance** - Ensure pattern completes in reasonable time
+
+## Best Practices
+
+<Info>
+- Keep patterns simple and readable
+- Use meaningful Walk() distances (11 units ≈ field width)
+- Test patterns in Sunflower Field first (simple, accessible)
+- Add comments explaining complex logic
+- Use `HyperSleep()` for precise timing when needed
+- Consider different field shapes when designing
+</Info>
+
+## File Location
+
+Place pattern files here:
+```
+Natro Macro/
+└── patterns/
+    ├── MyCustomPattern.ahk
+    ├── Snake.ahk
+    └── Lines.ahk
+```
+
+Pattern names automatically appear in the Field Pattern dropdown after successful import.
+
+## Further Resources
+
+- [AutoHotkey v2 Documentation](https://www.autohotkey.com/docs/v2/)
+- [GitHub Pattern Repository](https://github.com/NatroTeam/Paths-Patterns)
+- [Discord #patterns Channel](https://discord.gg/natromacro)
+
+<Info>
+Need help? Join our Discord server for pattern creation support and to share your patterns with the community!
+</Info>

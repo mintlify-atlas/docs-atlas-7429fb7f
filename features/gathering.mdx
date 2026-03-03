@@ -1,0 +1,249 @@
+---
+title: Field gathering automation
+description: Automate pollen collection across all 17 fields with customizable patterns and strategies
+---
+
+Natro Macro automates pollen gathering across all 17 fields in Bee Swarm Simulator. You can configure up to 3 gathering fields with custom patterns, rotation settings, and field-specific strategies.
+
+## Available fields
+
+The macro supports gathering in all 17 fields:
+
+<Tabs>
+  <Tab title="Starter fields">
+    - **Sunflower Field** - Yellow pollen, mountain booster
+    - **Dandelion Field** - White pollen, mountain booster, comforting nectar
+    - **Mushroom Field** - Red pollen, red booster, motivating nectar
+    - **Blue Flower Field** - Blue pollen, blue booster, refreshing nectar
+    - **Clover Field** - White pollen, mountain booster, invigorating nectar
+  </Tab>
+  
+  <Tab title="Mid-tier fields">
+    - **Spider Field** - Red pollen, mountain booster, motivating nectar
+    - **Strawberry Field** - Red pollen, red booster, refreshing nectar
+    - **Bamboo Field** - Blue pollen, blue booster, comforting nectar
+    - **Pineapple Field** - Yellow pollen, mountain booster, satisfying nectar
+  </Tab>
+  
+  <Tab title="Advanced fields">
+    - **Stump Field** - Blue pollen, blue booster, motivating nectar
+    - **Cactus Field** - White pollen, mountain booster, invigorating nectar
+    - **Pumpkin Field** - Orange pollen, mountain booster, satisfying nectar
+    - **Pine Tree Field** - Blue pollen, blue booster, comforting nectar
+    - **Rose Field** - Red pollen, red booster, motivating nectar
+  </Tab>
+  
+  <Tab title="End-game fields">
+    - **Mountain Top Field** - No field booster, invigorating nectar
+    - **Pepper Field** - Red pollen, red booster, invigorating nectar
+    - **Coconut Field** - No field booster, refreshing nectar
+  </Tab>
+</Tabs>
+
+## Field configuration
+
+Each of the 3 gathering slots can be configured with these settings:
+
+### Basic settings
+
+```ahk
+FieldName1 = "Sunflower"          // Field to gather in
+FieldPattern1 = "Squares"          // Gathering pattern
+FieldPatternSize1 = "M"            // Pattern size (S/M/L/XL)
+FieldPatternReps1 = 3              // Number of pattern repetitions
+```
+
+### Advanced settings
+
+<Accordion title="Pattern modifiers">
+```ahk
+FieldPatternShift1 = 0             // Shift pattern position
+FieldPatternInvertFB1 = 0          // Invert forward/backward
+FieldPatternInvertLR1 = 0          // Invert left/right
+```
+</Accordion>
+
+<Accordion title="Gathering conditions">
+```ahk
+FieldUntilMins1 = 20               // Gather for X minutes
+FieldUntilPack1 = 95               // Until backpack reaches X%
+FieldReturnType1 = "Walk"          // Return method (Walk/Reset)
+```
+</Accordion>
+
+<Accordion title="Sprinkler placement">
+```ahk
+FieldSprinklerLoc1 = "Center"      // Sprinkler location
+FieldSprinklerDist1 = 10           // Distance to sprinkler
+```
+
+Available sprinkler locations:
+- Center
+- Upper Left
+- Upper Right  
+- Lower Left
+- Lower Right
+- Left
+- Right
+</Accordion>
+
+<Accordion title="Camera rotation">
+```ahk
+FieldRotateDirection1 = "None"     // Rotation direction
+FieldRotateTimes1 = 1              // Number of rotations
+FieldDriftCheck1 = 1               // Enable drift correction
+```
+
+Rotation options: None, Left, Right
+</Accordion>
+
+## Gathering patterns
+
+The macro includes several built-in patterns optimized for different fields:
+
+### Default patterns
+
+- **Squares** - Efficient square coverage pattern
+- **Lines** - Back-and-forth line pattern
+- **CornerXSnake** - Snake pattern starting from corner
+- **Stationary** - Stay in one spot (for small fields like Clover/Stump)
+- **XSnake** - Cross-field snake pattern
+
+### Custom patterns
+
+You can add custom patterns in the `/patterns/` directory. Each pattern is an AutoHotkey script that defines the walking path.
+
+<Tip>
+The macro automatically validates custom patterns on import to ensure they're safe to use.
+</Tip>
+
+## Field-specific strategies
+
+### Field default settings
+
+Each field has optimized default settings stored in `field_config.ini`:
+
+<CodeGroup>
+```ahk Sunflower Field
+pattern = "CornerXSnake"
+size = "M"
+width = 4
+camera = "None"
+turns = 1
+sprinkler = "Upper Left"
+distance = 8
+percent = 95
+gathertime = 10
+convert = "Walk"
+drift = 0
+```
+
+```ahk Blue Flower Field  
+pattern = "CornerXSnake"
+size = "M"
+width = 7
+camera = "Right"
+turns = 2
+sprinkler = "Center"
+distance = 1
+percent = 95
+gathertime = 10
+convert = "Walk"
+drift = 0
+```
+
+```ahk Clover Field
+pattern = "Stationary"
+size = "S"
+width = 1
+camera = "None"
+turns = 1
+sprinkler = "Center"
+distance = 1
+percent = 95
+gathertime = 10
+convert = "Walk"
+drift = 0
+```
+</CodeGroup>
+
+### Field rotation
+
+The macro cycles through your configured fields in order:
+
+1. Gathers in Field 1 until conditions are met
+2. Converts honey at hive (if backpack is full)
+3. Moves to Field 2 and repeats
+4. After Field 3, returns to Field 1
+
+<Info>
+Set a field to "None" to skip that gathering slot.
+</Info>
+
+## Walk paths
+
+The macro uses predefined paths to navigate between the hive and fields. These are stored in the `/paths/` directory:
+
+- `gtf-[field].ahk` - Go to field from hive
+- `wf-[field].ahk` - Walk from field back to hive
+- `gtp-[field].ahk` - Go to planter in field
+
+<Tip>
+Walk paths are optimized to avoid getting stuck and work with both Cannon and Walk movement methods.
+</Tip>
+
+## Performance tips
+
+<AccordionGroup>
+  <Accordion title="Optimize pattern selection">
+    - Use **Stationary** for small fields (Clover, Stump, Cactus)
+    - Use **CornerXSnake** for most medium/large fields
+    - Adjust pattern size based on your bee's convert rate
+  </Accordion>
+  
+  <Accordion title="Balance gathering time">
+    - Set `FieldUntilMins` based on field size and buffs
+    - Use `FieldUntilPack` to avoid overfilling backpack
+    - Consider field boost duration (typically 15 minutes)
+  </Accordion>
+  
+  <Accordion title="Field rotation strategy">
+    - Prioritize fields that match your hive color
+    - Include fields needed for active quests
+    - Balance between efficient gathering and quest completion
+  </Accordion>
+  
+  <Accordion title="Movement optimization">
+    Set your movement speed correctly:
+    ```ahk
+    MoveSpeedNum = 28  // Default, adjust based on hive
+    ```
+    Higher bee counts and movement buffs increase this value.
+  </Accordion>
+</AccordionGroup>
+
+## Troubleshooting
+
+<Warning>
+If the macro gets stuck in a field:
+1. Check that your `MoveSpeedNum` is set correctly
+2. Verify the field pattern isn't too large for your convert rate
+3. Enable `FieldDriftCheck` to auto-correct positioning errors
+</Warning>
+
+### Common issues
+
+**Macro doesn't gather efficiently:**
+- Reduce `FieldPatternSize` to match your backpack capacity
+- Increase `FieldPatternReps` for better field coverage
+- Adjust sprinkler placement for your gathering pattern
+
+**Backpack fills too quickly:**
+- Lower `FieldUntilPack` percentage
+- Reduce `FieldUntilMins` duration
+- Check if you need better conversion buffs
+
+**Character drifts or gets stuck:**
+- Enable `FieldDriftCheck = 1`
+- Verify your display scale is 100%
+- Check that Roblox graphics are set to lowest quality

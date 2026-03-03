@@ -1,0 +1,320 @@
+---
+title: Movement Patterns
+description: Learn about gathering patterns, pattern syntax, and how to create or import custom patterns
+---
+
+## Overview
+
+Patterns control how your character moves through fields while gathering pollen. Natro Macro includes 13 built-in patterns optimized for different field shapes and gathering strategies.
+
+## Built-in Patterns
+
+Natro Macro includes these default patterns:
+
+<CardGroup cols={2}>
+  <Card title="Auryn" icon="shapes">
+    Complex pattern with multiple movements, good for large fields
+  </Card>
+  <Card title="CornerXSnake" icon="route">
+    Efficient corner-to-corner snake pattern (default for most fields)
+  </Card>
+  <Card title="Diamonds" icon="gem">
+    Diamond-shaped movement pattern
+  </Card>
+  <Card title="e_lol" icon="face-smile">
+    Custom community pattern
+  </Card>
+  <Card title="Fork" icon="code-fork">
+    Forked path movement
+  </Card>
+  <Card title="Lines" icon="grip-lines">
+    Simple line-based gathering
+  </Card>
+  <Card title="Slimline" icon="minus">
+    Compact line pattern for narrow fields
+  </Card>
+  <Card title="Snake" icon="wave-square">
+    Classic snake/zigzag pattern
+  </Card>
+  <Card title="Squares" icon="square">
+    Square spiral pattern
+  </Card>
+  <Card title="Stationary" icon="location-dot">
+    Stay in one spot (for small fields like Clover)
+  </Card>
+  <Card title="SuperCat" icon="cat">
+    Advanced pattern with complex movements
+  </Card>
+  <Card title="XSnake" icon="x">
+    X-shaped snake pattern
+  </Card>
+</CardGroup>
+
+## Pattern Variables
+
+Patterns can use these variables to customize behavior:
+
+<ParamField path="size" type="number" default="1">
+  Pattern size multiplier. Larger values = wider movements.
+  
+  Common values:
+  - **XS** = 0.5
+  - **S** = 0.75  
+  - **M** = 1
+  - **L** = 1.5
+  - **XL** = 2
+</ParamField>
+
+<ParamField path="reps" type="number" default="1">
+  Number of times to repeat the pattern.
+</ParamField>
+
+<ParamField path="facingcorner" type="boolean" default="0">
+  Whether the character is facing a corner at pattern start.
+</ParamField>
+
+### Field-Specific Variables
+
+These are automatically set by the macro based on your field configuration:
+
+- `FieldName` - Current field name
+- `FieldPattern` - Pattern being used
+- `FieldPatternSize` - Pattern size (XS/S/M/L/XL)
+- `FieldPatternReps` - Number of repetitions
+- `FieldPatternShift` - Pattern shift amount
+- `FieldPatternInvertFB` - Invert forward/backward
+- `FieldPatternInvertLR` - Invert left/right
+- `FieldReturnType` - How to return to hive
+- `FieldSprinklerLoc` - Sprinkler location
+- `FieldSprinklerDist` - Distance from sprinkler
+- `FieldRotateDirection` - Camera rotation direction
+- `FieldRotateTimes` - Number of rotations
+- `FieldDriftCheck` - Enable drift correction
+- `FieldUntilPack` - Gather until backpack %
+- `FieldUntilMins` - Gather for X minutes
+
+## Pattern Syntax
+
+Patterns are written in AutoHotkey v2 and use movement functions:
+
+<CodeGroup>
+```ahk Example: Squares Pattern
+loop reps {
+	send "{" TCFBKey " down}"
+	Walk(5 * size + A_Index)
+	send "{" TCFBKey " up}{" TCLRKey " down}"
+	Walk(5 * size + A_Index)
+	send "{" TCLRKey " up}{" AFCFBKey " down}"
+	Walk(5 * size + A_Index)
+	send "{" AFCFBKey " up}{" AFCLRKey " down}"
+	Walk(5 * size + A_Index)
+	send "{" AFCLRKey " up}"
+}
+```
+
+```ahk Example: Lines Pattern  
+loop reps {
+	send "{" TCLRKey " down}"
+	Walk(11 * size)
+	send "{" TCLRKey " up}{" TCFBKey " down}"
+	Walk(1)
+	send "{" TCFBKey " up}{" AFCLRKey " down}"
+	Walk(11 * size)
+	send "{" AFCLRKey " up}{" TCFBKey " down}"
+	Walk(1)
+	send "{" TCFBKey " up}"
+}
+```
+
+```ahk Example: Stationary Pattern
+Sleep 10000
+```
+</CodeGroup>
+
+### Movement Keys
+
+Patterns use these key variables (mapped to WASD by default):
+
+- `TCFBKey` / `FwdKey` - Forward (W)
+- `TCLRKey` / `LeftKey` - Left (A)  
+- `AFCFBKey` / `BackKey` - Backward (S)
+- `AFCLRKey` / `RightKey` - Right (D)
+- `RotLeft` - Rotate camera left (,)
+- `RotRight` - Rotate camera right (.)
+- `RotUp` - Rotate camera up (PgUp)
+- `RotDown` - Rotate camera down (PgDn)
+
+### Helper Functions
+
+Available functions in patterns:
+
+<ParamField path="Walk(tiles)" type="function">
+  Walk forward for specified number of tiles at current angle.
+</ParamField>
+
+<ParamField path="nm_Walk(tiles, key1, key2?)" type="function">  
+  Walk in specified direction(s).
+  
+  Example: `nm_Walk(10, FwdKey, RightKey)` walks diagonally
+</ParamField>
+
+<ParamField path="HyperSleep(duration)" type="function">
+  Sleep for duration in milliseconds.
+</ParamField>
+
+<ParamField path="nm_CameraRotation(direction, turns)" type="function">
+  Rotate camera. Direction: "Left"/"Right", Turns: number of rotations
+</ParamField>
+
+## Creating Custom Patterns
+
+1. Create a new `.ahk` file in the `patterns/` folder
+2. Name it descriptively (e.g., `MyCustomPattern.ahk`)
+3. Write your pattern using the syntax above
+4. Reload the macro to import the pattern
+
+<CodeGroup>
+```ahk Custom Pattern Example
+; Simple circle pattern
+loop reps {
+    ; Walk forward
+    send "{" TCFBKey " down}"
+    Walk(3 * size)
+    send "{" TCFBKey " up}"
+    
+    ; Rotate right
+    send "{" RotRight " down}"
+    Sleep 100
+    send "{" RotRight " up}"
+    
+    ; Walk forward again  
+    send "{" TCFBKey " down}"
+    Walk(3 * size)
+    send "{" TCFBKey " up}"
+    
+    ; Rotate right
+    send "{" RotRight " down}"
+    Sleep 100
+    send "{" RotRight " up}"
+}
+```
+</CodeGroup>
+
+## Importing Patterns
+
+<Warning>
+**SECURITY WARNING**: Pattern files can execute ANY AutoHotkey code, including malicious code. Only import patterns from trusted sources!
+
+Trusted sources:
+- Natro Discord server (#patterns channel)
+- https://github.com/NatroTeam/Paths-Patterns
+
+NEVER download patterns from strangers or untrusted websites!
+</Warning>
+
+When you add a new pattern file:
+
+1. The macro detects the new file on reload
+2. A security warning appears (unless it's a verified default pattern)
+3. You must confirm you trust the pattern source  
+4. The pattern is validated for syntax errors
+5. If valid, it's imported and available for use
+
+### Pattern Import Process
+
+From `natro_macro.ahk:172-304`:
+
+<CodeGroup>
+```ahk Pattern Import Code
+nm_importPatterns()
+{
+    global patterns := Map()
+    patterns.CaseSense := 0
+    global patternlist := []
+    
+    ; Load existing patterns
+    Loop Files A_WorkingDir "\patterns\*.ahk"
+    {
+        file := FileOpen(A_LoopFilePath, "r")
+        pattern := file.Read()
+        file.Close()
+        
+        ; Check for deprecated syntax
+        if RegexMatch(pattern, "im)patterns\[")
+            MsgBox "Pattern deprecated!"
+            
+        ; Validate pattern syntax
+        exec := ComObject("WScript.Shell").Exec('"' exe_path64 '" /script /Validate /ErrorStdOut *')
+        exec.StdIn.Write(script)
+        exec.StdIn.Close()
+        
+        if (stdout := exec.StdOut.ReadAll())
+        {
+            MsgBox "Unable to import pattern! Error: " stdout
+            continue
+        }
+        
+        ; Import successful
+        patternlist.Push(pattern_name)
+        patterns[pattern_name] := pattern
+    }
+}
+```
+</CodeGroup>
+
+## Pattern Security
+
+The macro implements several security measures:
+
+1. **Hash verification**: Default patterns are verified against known good hashes
+2. **Syntax validation**: Patterns are checked for errors before import
+3. **User confirmation**: New patterns require explicit user approval
+4. **Deprecation detection**: Old pattern syntax is rejected
+
+Pattern hashes are stored in `settings/imported/patternHashes.ahk`.
+
+## Using Patterns in Fields
+
+Configure patterns for each field in the Gather tab:
+
+1. Select field from Field 1/2/3 dropdown
+2. Choose pattern from Pattern dropdown  
+3. Set pattern size (XS/S/M/L/XL)
+4. Set repetitions
+5. Enable shift, invert FB, or invert LR if needed
+
+### Pattern Tips
+
+<Card title="Field Shape Matching" icon="shapes">
+  - **Square fields**: Squares, Snake, CornerXSnake
+  - **Rectangular fields**: Lines, Slimline
+  - **Circular fields**: Stationary, Custom circular patterns
+  - **Large fields**: Auryn, XSnake, SuperCat
+</Card>
+
+<Card title="Optimization" icon="gauge-high">  
+  - Start with default patterns for each field
+  - Adjust size based on field coverage
+  - Increase reps for longer gathering time
+  - Use Stationary for very small fields (Clover, Stump, Cactus)
+</Card>
+
+## Troubleshooting
+
+**Pattern not appearing in dropdown**
+- Check file is in `patterns/` folder
+- Ensure file has `.ahk` extension
+- Reload the macro
+- Check for syntax errors in validation
+
+**Character moves incorrectly**  
+- Verify movement speed is set correctly
+- Check key bindings match in-game controls
+- Ensure camera is at correct angle at pattern start
+- Adjust pattern size
+
+**Pattern validation fails**
+- Check AutoHotkey v2 syntax
+- Ensure all functions are defined
+- Remove deprecated `patterns[]` syntax
+- Check for typos in variable names

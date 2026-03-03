@@ -1,0 +1,789 @@
+---
+title: Discord Integration  
+description: Connect Natro Macro to Discord for real-time notifications, remote control, screenshots, and statistics reporting
+---
+
+Natro Macro includes powerful Discord integration that enables remote monitoring, notifications, and even remote control of your macro through Discord webhooks or bot tokens.
+
+## Integration Modes
+
+Natro Macro supports two Discord integration modes:
+
+### Webhook Mode (Mode 0)
+
+**Advantages:**
+- Easiest to set up
+- No bot creation needed
+- Works with any webhook-enabled channel
+
+**Limitations:**
+- One-way communication only (macro → Discord)
+- No remote commands
+- Cannot read messages
+
+### Bot Mode (Mode 1)
+
+**Advantages:**
+- Full two-way communication
+- Remote command support
+- Channel-specific messaging
+- Read message history
+
+**Limitations:**
+- Requires bot creation and token
+- More complex setup
+- Needs proper permissions
+
+<Note>
+Both modes support screenshots, embeds, and file uploads. Choose based on whether you need remote control.
+</Note>
+
+## Setup Instructions
+
+### Webhook Mode Setup
+
+<Steps>
+  <Step title="Create Webhook">
+    In Discord:
+    1. Right-click your target channel
+    2. Select **Edit Channel** → **Integrations**
+    3. Click **Create Webhook**
+    4. Name it (e.g., "Natro Macro")
+    5. Copy the webhook URL
+  </Step>
+
+  <Step title="Configure Macro">
+    In Natro Macro **Status** tab:
+    1. Set **Discord Mode** to **Webhook**
+    2. Paste webhook URL in **Webhook** field
+    3. Check **Discord Check** to enable
+  </Step>
+
+  <Step title="Configure Screenshots (Optional)">
+    Enable screenshot types:
+    - **Critical SS** - Critical errors
+    - **Amulet SS** - Amulet drops
+    - **Machine SS** - Dispenser collections
+    - **Balloon SS** - Balloon spawns  
+    - **Vicious SS** - Vicious Bee kills
+    - **Death SS** - Character deaths
+    - **Planter SS** - Planter collections
+    - **Honey SS** - Honey milestones
+  </Step>
+</Steps>
+
+### Bot Mode Setup
+
+<Steps>
+  <Step title="Create Discord Bot">
+    1. Go to [Discord Developer Portal](https://discord.com/developers/applications)
+    2. Click **New Application**
+    3. Name your application
+    4. Go to **Bot** tab
+    5. Click **Add Bot**
+    6. Click **Reset Token** and copy the token
+    7. Enable required intents:
+       - Message Content Intent
+       - Server Members Intent (if using UIDs)
+  </Step>
+
+  <Step title="Invite Bot to Server">
+    1. Go to **OAuth2** → **URL Generator**
+    2. Select scopes:
+       - `bot`
+    3. Select permissions:
+       - Send Messages
+       - Attach Files
+       - Read Message History
+       - Add Reactions
+    4. Copy generated URL and open in browser
+    5. Select your server and authorize
+  </Step>
+
+  <Step title="Get Channel IDs">
+    Enable Developer Mode in Discord:
+    1. User Settings → Advanced → Developer Mode
+    2. Right-click your main channel → **Copy ID**
+    3. Right-click your report channel → **Copy ID** (optional)
+  </Step>
+
+  <Step title="Configure Macro">
+    In Natro Macro **Status** tab:
+    1. Set **Discord Mode** to **Bot Token**
+    2. Paste bot token in **Bot Token** field  
+    3. Paste channel ID in **Main Channel ID**
+    4. Check **Main Channel Check**
+    5. (Optional) Configure **Report Channel ID**
+    6. Check **Discord Check** to enable
+  </Step>
+</Steps>
+
+## Configuration Options
+
+### Status Tab Settings
+
+```ini
+; In nm_config.ini [Status]
+DiscordMode=0              ; 0=Webhook, 1=Bot
+DiscordCheck=1             ; 0=disabled, 1=enabled
+Webhook=https://...        ; Webhook URL (Mode 0)
+BotToken=MTk...            ; Bot token (Mode 1)
+
+; Channels (Mode 1 only)  
+MainChannelCheck=1
+MainChannelID=123456789
+ReportChannelCheck=1
+ReportChannelID=987654321
+
+; Screenshots
+ssCheck=1                  ; Master screenshot enable
+ssDebugging=0              ; Debug mode screenshots
+CriticalSSCheck=1          ; Critical errors
+AmuletSSCheck=1            ; Amulet drops
+MachineSSCheck=1           ; Dispensers/machines
+BalloonSSCheck=1           ; Balloons
+ViciousSSCheck=1           ; Vicious Bee
+DeathSSCheck=1             ; Deaths
+PlanterSSCheck=1           ; Planters
+HoneySSCheck=0             ; Honey updates
+HoneyUpdateSSCheck=1       ; Honey milestones
+
+; Ping Settings
+criticalCheck=1            ; Enable pings
+discordUID=123456789       ; Your Discord user ID
+discordUIDCommands=456789  ; User ID for commands
+CriticalErrorPingCheck=1
+DisconnectPingCheck=1  
+GameFrozenPingCheck=1
+PhantomPingCheck=1
+UnexpectedDeathPingCheck=0
+EmergencyBalloonPingCheck=0
+
+; Commands (Mode 1)
+commandPrefix=?            ; Command prefix character
+```
+
+### Easter Egg Feature
+
+```ini
+WebhookEasterEgg=0         ; Fun Easter egg messages
+```
+
+<Tip>
+Enable `WebhookEasterEgg` for occasional fun messages mixed with regular updates.
+</Tip>
+
+## Discord Library (Discord.ahk)
+
+The macro uses a custom Discord class for API interactions:
+
+### Core Functions
+
+#### SendEmbed()
+
+Sends rich embed messages with optional images:
+
+```ahk
+; From Discord.ahk:11-34
+static SendEmbed(message, color:=3223350, content:="", pBitmap:=0, channel:="", replyID:=0)
+{
+    payload_json := '
+    {
+        "content": "' content '",
+        "embeds": [{
+            "description": "' message '",
+            "color": "' color '"
+            ' (pBitmap ? (',"image": {"url": "attachment://ss.png"}') : '') '
+        }]
+        ' (replyID ? (',"allowed_mentions": {"parse": []}, "message_reference": {"message_id": "' replyID '"}') : '') '
+    }'
+    
+    return this.SendMessageAPI(postdata, contentType, channel)
+}
+```
+
+**Parameters:**
+- `message` - Main message text (in embed description)
+- `color` - Decimal color code (default: 3223350 = teal)
+- `content` - Optional content text above embed
+- `pBitmap` - Optional bitmap pointer for screenshot
+- `channel` - Channel ID (Bot mode only)
+- `replyID` - Message ID to reply to
+
+**Color Codes:**
+- `3223350` - Default teal
+- `16711731` - Red (errors)
+- `16776960` - Yellow (warnings)
+- `65280` - Green (success)
+- `7036559` - Purple (bosses)
+
+#### SendFile()
+
+Sends file attachments:
+
+```ahk
+; From Discord.ahk:36-89
+static SendFile(filepath, replyID:=0)
+{
+    ; Supports: PNG, JPEG, JPG, BMP, GIF, WEBP, TXT, INI
+    ; Folders are zipped automatically
+    ; Max size: 10MB (10,485,760 bytes)
+}
+```
+
+**Features:**
+- Automatic folder zipping
+- MIME type detection
+- File size validation
+- Error handling
+
+#### SendImage()
+
+Sends bitmap as PNG image:
+
+```ahk
+; From Discord.ahk:91-98
+static SendImage(pBitmap, imgname:="image.png", replyID:=0)
+{
+    params := []
+    params.Push(Map("name","files[0]","filename",imgname,
+        "content-type","image/png","pBitmap",pBitmap))
+    this.CreateFormData(&postdata, &contentType, params)
+    this.SendMessageAPI(postdata, contentType)
+}
+```
+
+<Note>
+All image functions use GDI+ bitmaps. Screenshots are captured with `Gdip_BitmapFromScreen()` and sent directly without saving to disk.
+</Note>
+
+### Bot Mode Functions
+
+#### GetRecentMessages()
+
+Reads recent channel messages:
+
+```ahk  
+; From Discord.ahk:180-197
+static GetRecentMessages(channel)
+{
+    static lastmsg := Map()
+    
+    try
+        messages := JSON.parse(this.GetMessageAPI(
+            lastmsg.Has(channel) ? ("?after=" lastmsg[channel]) : "?limit=1", 
+            channel))
+    catch
+        return []
+    
+    if (messages.Has(1))
+        lastmsg[channel] := messages[1]["id"]
+    
+    return messages
+}
+```
+
+**Use Case:** Check for new commands from users
+
+#### GetCommands()
+
+Parses commands from messages:
+
+```ahk
+; From Discord.ahk:133-145  
+static GetCommands(channel)
+{
+    Loop (n := (messages := this.GetRecentMessages(channel)).Length)
+    {
+        i := n - A_Index + 1
+        content := Trim(messages[i]["content"])
+        if (SubStr(content, 1, StrLen(commandPrefix)) = commandPrefix)
+            command_buffer.Push({
+                content: content,
+                id: messages[i]["id"],
+                url: messages[i]["attachments"].Has(1) ? messages[i]["attachments"][1]["url"] : "",
+                user_id: messages[i]["author"]["id"]
+            })
+    }
+}
+```
+
+**Returns:** Array of command objects with:
+- `content` - Full message text
+- `id` - Message ID for replies
+- `url` - Attachment URL if present
+- `user_id` - Author's Discord ID
+
+#### EditMessageAPI()
+
+Edits previously sent messages:
+
+```ahk
+; From Discord.ahk:228-256
+static EditMessageAPI(id, postdata, contentType:="application/json", channel:="")
+{
+    url := (discordMode = 0) 
+        ? (webhook "/messages/" id) 
+        : (this.BaseURL "/channels/" channel "/messages/" id)
+    
+    wr := ComObject("WinHttp.WinHttpRequest.5.1")
+    wr.Open("PATCH", url, 1)
+    if (discordMode = 1)
+    {
+        wr.SetRequestHeader("User-Agent", "DiscordBot (AHK, " A_AhkVersion ")")
+        wr.SetRequestHeader("Authorization", "Bot " bottoken)
+    }
+    wr.SetRequestHeader("Content-Type", contentType)
+    wr.Send(postdata)
+    return wr.ResponseText
+}
+```
+
+**Use Case:** Update status messages with current progress
+
+## Notification Types
+
+### Screenshot Notifications
+
+When enabled, the macro captures and sends screenshots for:
+
+#### Critical Errors
+
+```ahk
+; Triggered on critical failures
+if (CriticalSSCheck)
+    discord.SendEmbed("Critical Error: " errorMsg, 16711731, , pBitmap)
+```
+
+**Color:** Red (16711731)
+
+#### Amulet Drops
+
+```ahk
+; Sent when boss drops amulet
+if (AmuletSSCheck)
+    discord.SendEmbed("Amulet from " bossName, 65280, , pBitmap)
+```
+
+**Color:** Green (65280)
+
+#### Machine Collections
+
+```ahk
+; Dispenser/Blender collections
+if (MachineSSCheck)
+    discord.SendEmbed("Collected " machineName, 3223350, , pBitmap)
+```
+
+**Color:** Teal (3223350)
+
+#### Balloon Spawns  
+
+```ahk
+; Emergency or rare balloons
+if (BalloonSSCheck)
+    discord.SendEmbed("Balloon spawned", 16776960, , pBitmap)
+```
+
+**Color:** Yellow (16776960)
+
+#### Vicious Bee Kills
+
+```ahk
+; Vicious Bee defeated
+if (ViciousSSCheck)
+    discord.SendEmbed("Vicious Bee killed", 7036559, , pBitmap)
+```
+
+**Color:** Purple (7036559)
+
+#### Deaths
+
+```ahk
+; Character death
+if (DeathSSCheck)
+    discord.SendEmbed("Death detected", 16711731, , pBitmap)
+```
+
+**Color:** Red (16711731)
+
+### Ping Notifications
+
+When critical events occur, the macro can ping you:
+
+```ahk
+; Ping on critical error
+if (CriticalErrorPingCheck && discordUID)
+    discord.SendEmbed(errorMsg, 16711731, "<@" discordUID ">")
+```
+
+**Ping Types:**
+- **Critical Error** - Major failures requiring attention
+- **Disconnect** - Lost connection to Roblox
+- **Game Frozen** - Game stopped responding  
+- **Phantom** - Phantom Bee detected
+- **Unexpected Death** - Death in safe area
+- **Emergency Balloon** - Rare/valuable balloon
+
+<Warning>
+Too many pings can be annoying. Enable only the most important ones.
+</Warning>
+
+### Status Updates
+
+Regular status reports sent to Discord:
+
+- **Session Start** - Macro started
+- **Gather Complete** - Field gathering finished
+- **Boss Kill** - Boss defeated
+- **Planter Collected** - Planter harvested
+- **Disconnect/Reconnect** - Connection status
+- **Honey Milestones** - Honey thresholds reached
+
+## Remote Commands (Bot Mode)
+
+When using Bot Mode, you can send commands from Discord:
+
+### Command Format
+
+```
+?command [arguments]
+```
+
+Default prefix is `?`, configurable via `commandPrefix` setting.
+
+### Available Commands
+
+The macro checks for commands in the main channel:
+
+```ahk
+; Command processing (conceptual)
+command_buffer := []
+discord.GetCommands(MainChannelID)
+
+for cmd in command_buffer {
+    if (cmd.user_id = discordUIDCommands) {
+        ; Parse and execute command
+        ; Reply to message with results
+    }
+}
+```
+
+**Security:** Only the user specified in `discordUIDCommands` can execute commands.
+
+### Common Commands
+
+- `?status` - Get current macro status
+- `?stats` - View statistics  
+- `?ping` - Check if macro is responsive
+- `?screenshot` - Request screenshot
+- `?planters` - Check planter timers
+- `?bosses` - View boss cooldowns
+
+<Note>
+Command availability depends on macro version and configuration. Check your version's documentation for complete command list.
+</Note>
+
+## Statistics Reporting
+
+The macro can send periodic statistics:
+
+```ahk
+; Example stats embed
+statsMsg := '
+Session Runtime: 5h 30m
+Total Honey: 50.5B
+Boss Kills: 3
+Planters Collected: 12
+Disconnects: 0
+'
+discord.SendEmbed(statsMsg, 3223350)
+```
+
+**Includes:**
+- Runtime (session and total)
+- Honey collected
+- Boss kills
+- Bug kills
+- Planter collections
+- Quest completions
+- Disconnections
+
+## Night Announcements
+
+Special feature for announcing in-game night time:
+
+```ini
+[Status]
+NightAnnouncementCheck=1
+NightAnnouncementName=@everyone
+NightAnnouncementPingID=
+NightAnnouncementWebhook=https://...
+```
+
+**Use Case:** Notify your server when night time begins (for night Memory Match, Vicious Bee, etc.)
+
+```ahk
+; Night announcement
+if (NightAnnouncementCheck && isNightTime)
+    discord.SendEmbed(
+        "Night time has begun!",
+        7036559,
+        NightAnnouncementPingID ? ("<@" NightAnnouncementPingID ">") : NightAnnouncementName,
+        ,
+        ,
+        
+    )
+```
+
+## Best Practices
+
+<Tip>
+**Start Simple**
+- Begin with Webhook mode
+- Enable only essential screenshots (Critical, Death)
+- Add more features gradually
+</Tip>
+
+<Tip>
+**Channel Organization**  
+- Use separate channels for main updates and reports
+- Main: Status updates, completions
+- Report: Errors, deaths, critical events
+- Consider a third channel for statistics/hourly updates
+</Tip>
+
+<Tip>
+**Screenshot Management**
+- Enable screenshots for events you want to review
+- Disable routine screenshots to reduce spam
+- Use `ssDebugging` only when troubleshooting
+- Honey SS can generate many messages - enable sparingly
+</Tip>
+
+<Tip>
+**Ping Settings**  
+- Only enable pings for truly critical events
+- Use a dedicated Discord account for testing
+- Consider Do Not Disturb hours
+- Test ping functionality before extended runs
+</Tip>
+
+<Tip>
+**Remote Commands**
+- Set `discordUIDCommands` to your user ID only
+- Never share your bot token
+- Use a dedicated bot (don't reuse other bots)
+- Test commands in a private server first
+</Tip>
+
+## Troubleshooting
+
+### Messages Not Sending
+
+**Webhook Mode:**
+- Verify webhook URL is correct and complete
+- Check webhook hasn't been deleted in Discord
+- Ensure channel still exists
+- Test webhook manually with curl or online tool
+
+**Bot Mode:**
+- Verify bot token is valid
+- Check bot is in the server
+- Verify channel IDs are correct
+- Ensure bot has Send Messages permission
+- Check bot isn't rate-limited
+
+### Screenshots Not Uploading
+
+- Check file size (max 10MB)
+- Verify `ssCheck` is enabled
+- Ensure specific SS type is enabled (e.g., `CriticalSSCheck`)
+- Check Gdip_All.ahk is loaded correctly
+- Verify bitmap creation is successful
+
+### Commands Not Working
+
+- Verify Bot Mode is active (`DiscordMode=1`)
+- Check `discordUIDCommands` matches your user ID
+- Get your user ID: Enable Developer Mode, right-click yourself, Copy ID  
+- Ensure command prefix is correct (default `?`)
+- Verify bot has Read Message History permission
+- Check bot has Message Content intent enabled
+
+### Rate Limiting
+
+Discord API has rate limits:
+
+```ahk
+; From Discord.ahk:126
+wr.SetTimeouts(0, 60000, 120000, 30000)
+```
+
+- **Connect:** 60 seconds
+- **Send:** 120 seconds  
+- **Receive:** 30 seconds
+
+**Solutions:**
+- Reduce message frequency
+- Disable less important notifications
+- Batch updates instead of individual messages
+- Use embed edits instead of new messages
+
+### Permission Errors
+
+Bot needs these permissions:
+- Send Messages
+- Attach Files  
+- Read Message History
+- Add Reactions (optional)
+- Manage Messages (optional, for edits)
+
+**Fix:**
+1. Go to Discord Developer Portal
+2. Select your application
+3. Go to OAuth2 → URL Generator  
+4. Regenerate invite with correct permissions
+5. Re-invite bot to server
+
+## Advanced Features
+
+### Custom Embeds
+
+You can customize embed colors and content:
+
+```ahk
+; Custom color example
+successColor := 65280      ; Green
+warningColor := 16776960   ; Yellow
+errorColor := 16711731     ; Red
+bossColor := 7036559       ; Purple
+
+discord.SendEmbed("Custom message", successColor)
+```
+
+### File Attachments
+
+Send config files or logs:
+
+```ahk
+; Send config file
+discord.SendFile("settings\nm_config.ini")
+
+; Send debug log
+discord.SendFile("settings\debug_log.txt")
+
+; Send folder (auto-zipped)  
+discord.SendFile("settings")
+```
+
+### Debugging Mode
+
+```ini
+ssDebugging=1
+```
+
+Enables extra screenshots for troubleshooting:
+- Every major state change
+- Navigation waypoints
+- Detection failures  
+- Timing issues
+
+<Warning>
+Debug mode generates many messages. Only enable when actively troubleshooting.
+</Warning>
+
+## Security Considerations
+
+<Warning>
+**Protect Your Tokens**
+- Never share your webhook URL or bot token
+- Don't commit config files to public repositories  
+- Regenerate tokens if compromised
+- Use environment variables for sensitive data (advanced)
+</Warning>
+
+<Warning>
+**Command Security**  
+- Only set `discordUIDCommands` to trusted user IDs
+- Commands can control your macro - be careful who has access
+- Consider requiring a secondary password for critical commands
+</Warning>
+
+## Configuration Reference
+
+### Full Status Section
+
+```ini
+[Status]
+; Connection
+DiscordMode=0
+DiscordCheck=0  
+Webhook=
+BotToken=
+
+; Channels (Bot Mode)
+MainChannelCheck=1
+MainChannelID=
+ReportChannelCheck=1
+ReportChannelID=
+
+; Screenshots
+ssCheck=0
+ssDebugging=0
+CriticalSSCheck=1
+AmuletSSCheck=1
+MachineSSCheck=1
+BalloonSSCheck=1
+ViciousSSCheck=1
+DeathSSCheck=1
+PlanterSSCheck=1
+HoneySSCheck=0
+HoneyUpdateSSCheck=1
+
+; Pings
+criticalCheck=0
+discordUID=
+discordUIDCommands=
+CriticalErrorPingCheck=1
+DisconnectPingCheck=1
+GameFrozenPingCheck=1
+PhantomPingCheck=1
+UnexpectedDeathPingCheck=0
+EmergencyBalloonPingCheck=0
+
+; Commands
+commandPrefix=?
+
+; Night Announcements
+NightAnnouncementCheck=0
+NightAnnouncementName=
+NightAnnouncementPingID=
+NightAnnouncementWebhook=
+
+; Other
+WebhookEasterEgg=0
+```
+
+### API Reference
+
+**Base URL:** `https://discord.com/api/v10/`
+
+**Endpoints Used:**
+- `POST /channels/{channel}/messages` - Send message
+- `GET /channels/{channel}/messages` - Get messages  
+- `PATCH /channels/{channel}/messages/{id}` - Edit message
+- `GET /channels/{channel}` - Get channel info
+- `GET /guilds/{guild}/members/{user}` - Get member info
+
+**Headers:**
+```ahk
+; Bot Mode
+User-Agent: DiscordBot (AHK, {version})
+Authorization: Bot {token}
+Content-Type: application/json
+```
+
+<Note>
+For complete API documentation, see [Discord API Reference](https://discord.com/developers/docs/intro).
+</Note>

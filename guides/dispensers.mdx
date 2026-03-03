@@ -1,0 +1,665 @@
+---
+title: Dispenser Collection
+description: Automate collection from all dispensers including honey, treats, blueberry, strawberry, coconut, royal jelly, and glue dispensers plus the Blender
+---
+
+Dispensers provide free items and resources on regular cooldowns. Natro Macro can automatically travel to and collect from all dispensers in Bee Swarm Simulator.
+
+## Available Dispensers
+
+Natro Macro supports seven dispensers with varying cooldown times:
+
+| Dispenser | Cooldown | Location | Special Requirements |
+|-----------|----------|----------|---------------------|
+| **Honey** | 1 hour | Dispenser Platform | None |
+| **Treat** | 1 hour | Dispenser Platform | None |
+| **Blueberry** | 4 hours | Blue Flower Field Area | None |
+| **Strawberry** | 4 hours | Strawberry Field Area | None |
+| **Coconut** | 4 hours | Coconut Field | Field unlock required |
+| **Royal Jelly** | 22 hours | Spider Field Area | Cannon method required |
+| **Glue** | 22 hours | Gummy Bear's Lair | Gumdrops in inventory |
+
+<Note>
+Cooldown times are fixed and cannot be reduced by game settings (unlike boss respawn timers).
+</Note>
+
+## Configuration
+
+### Enable Dispensers
+
+In the **Collect** tab, locate the **Dispensers GroupBox**:
+
+<Steps>
+  <Step title="Select Dispensers">
+    Check the boxes for dispensers you want to collect:
+    - **Honey** - Basic dispenser, 1 hour cooldown
+    - **Treat** - Basic dispenser, 1 hour cooldown
+    - **Blueberry** - Mid-game dispenser, 4 hour cooldown
+    - **Strawberry** - Mid-game dispenser, 4 hour cooldown
+    - **Coconut** - Advanced dispenser, 4 hour cooldown
+    - **Royal Jelly** - End-game dispenser, 22 hour cooldown
+    - **Glue** - End-game dispenser, 22 hour cooldown
+  </Step>
+
+  <Step title="Configure Auto-Enable">
+    Some features auto-enable dispensers:
+    ```ahk
+    ; From natro_macro.ahk:5978
+    msgbox "Coconut Dispenser collection has been automatically enabled"
+    ```
+    Coconut Dispenser enables automatically when Coconut Field boosting is configured
+  </Step>
+</Steps>
+
+### Configuration File
+
+```ini
+; In nm_config.ini [Collect]
+HoneyDisCheck=1
+LastHoneyDis=1234567890
+TreatDisCheck=1  
+LastTreatDis=1234567890
+BlueberryDisCheck=1
+LastBlueberryDis=1234567890
+StrawberryDisCheck=1
+LastStrawberryDis=1234567890
+CoconutDisCheck=1
+LastCoconutDis=1234567890
+RoyalJellyDisCheck=1
+LastRoyalJellyDis=1234567890  
+GlueDisCheck=1
+LastGlueDis=1234567890
+```
+
+## Dispenser Details
+
+### Honey Dispenser
+
+**Cooldown:** 1 hour (3,600 seconds)
+
+**Collection Process:**
+
+<Steps>
+  <Step title="Reset Position">
+    Returns character to hive using `nm_Reset()`
+  </Step>
+
+  <Step title="Travel">
+    Uses path: `nm_gotoCollect("honeydis")`
+  </Step>
+
+  <Step title="Collect">
+    ```ahk
+    ; From natro_macro.ahk:12164-12170
+    searchRet := nm_imgSearch("e_button.png",30,"high")
+    If (searchRet[1] = 0) {
+        sendinput "{" SC_E " down}"
+        Sleep 100
+        sendinput "{" SC_E " up}"
+        Sleep 500
+        nm_setStatus("Collected", "Honey Dispenser")
+    }
+    ```
+    Searches for E button prompt and presses E to collect
+  </Step>
+
+  <Step title="Update Timer">
+    ```ahk
+    LastHoneyDis:=nowUnix()
+    IniWrite LastHoneyDis, "settings\nm_config.ini", "Collect", "LastHoneyDis"
+    ```
+  </Step>
+</Steps>
+
+**Retry Logic:** Attempts twice if first collection fails
+
+### Treat Dispenser
+
+**Cooldown:** 1 hour (3,600 seconds)
+
+**Collection Process:** Identical to Honey Dispenser
+
+```ahk
+; From natro_macro.ahk:12178-12204
+nm_TreatDis(){
+    global TreatDisCheck, LastTreatDis
+    if (TreatDisCheck && (nowUnix()-LastTreatDis)>3600) {
+        Loop 2 {
+            nm_Reset()
+            nm_setStatus("Traveling", "Treat Dispenser")
+            nm_gotoCollect("treatdis")
+            
+            searchRet := nm_imgSearch("e_button.png",30,"high")
+            If (searchRet[1] = 0) {
+                sendinput "{" SC_E " down}"
+                Sleep 100
+                sendinput "{" SC_E " up}"
+                Sleep 500
+                nm_setStatus("Collected", "Treat Dispenser")
+                break
+            }
+        }
+        LastTreatDis:=nowUnix()
+        IniWrite LastTreatDis, "settings\nm_config.ini", "Collect", "LastTreatDis"
+    }
+}
+```
+
+<Tip>
+Honey and Treat dispensers have the shortest cooldowns. Enable both for frequent free items.
+</Tip>
+
+### Blueberry Dispenser
+
+**Cooldown:** 4 hours (14,400 seconds)
+
+**Collection Process:**
+
+<Steps>
+  <Step title="Travel">
+    Path: `nm_gotoCollect("blueberrydis")`
+    
+    Located near Blue Flower Field
+  </Step>
+
+  <Step title="Collect">
+    Same E button detection and press sequence
+  </Step>
+
+  <Step title="Timer Update">
+    ```ahk
+    ; From natro_macro.ahk:12230-12231
+    LastBlueberryDis:=nowUnix()
+    IniWrite LastBlueberryDis, "settings\nm_config.ini", "Collect", "LastBlueberryDis"
+    ```
+  </Step>
+</Steps>
+
+### Strawberry Dispenser  
+
+**Cooldown:** 4 hours (14,400 seconds)
+
+**Collection Process:** Identical to Blueberry Dispenser
+
+```ahk
+; From natro_macro.ahk:12234-12260
+nm_StrawberryDis(){
+    global StrawberryDisCheck, LastStrawberryDis
+    if (StrawberryDisCheck && (nowUnix()-LastStrawberryDis)>14400) {
+        Loop 2 {
+            nm_Reset()
+            nm_setStatus("Traveling", "Strawberry Dispenser")
+            nm_gotoCollect("strawberrydis")
+            
+            searchRet := nm_imgSearch("e_button.png",30,"high")  
+            If (searchRet[1] = 0) {
+                sendinput "{" SC_E " down}"
+                Sleep 100
+                sendinput "{" SC_E " up}"
+                sleep 500
+                nm_setStatus("Collected", "Strawberry Dispenser")
+                break
+            }
+        }
+        LastStrawberryDis:=nowUnix()
+        IniWrite LastStrawberryDis, "settings\nm_config.ini", "Collect", "LastStrawberryDis"
+    }
+}
+```
+
+<Note>
+Blueberry and Strawberry dispensers provide field-specific items useful for crafting and quests.
+</Note>
+
+### Coconut Dispenser
+
+**Cooldown:** 4 hours (14,400 seconds)
+
+**Requirements:** 
+- Coconut Field must be unlocked (35 bees)
+- Coconut Booster collection must not be active
+
+**Collection Process:**
+
+```ahk
+; From natro_macro.ahk:12262-12288
+nm_CoconutDis(){
+    global CoconutDisCheck, LastCoconutDis, CoconutBoosterCheck, BoostChaserCheck
+    if (CoconutDisCheck && (nowUnix()-LastCoconutDis)>14400 
+        && !(CoconutBoosterCheck && BoostChaserCheck)) {
+        Loop 2 {
+            nm_Reset()
+            nm_setStatus("Traveling", "Coconut Dispenser")
+            nm_gotoCollect("coconutdis")
+            
+            searchRet := nm_imgSearch("e_button.png",30,"high")
+            If (searchRet[1] = 0) {
+                sendinput "{" SC_E " down}"
+                Sleep 100
+                sendinput "{" SC_E " up}"
+                sleep 500
+                nm_setStatus("Collected", "Coconut Dispenser")
+                break
+            }
+        }
+        LastCoconutDis:=nowUnix()
+        IniWrite LastCoconutDis, "settings\nm_config.ini", "Collect", "LastCoconutDis"
+    }
+}
+```
+
+<Warning>
+Coconut Dispenser collection is skipped when both Coconut Booster Check and Boost Chaser are enabled to avoid interfering with boosted gathering.
+</Warning>
+
+### Glue Dispenser
+
+**Cooldown:** 22 hours (79,200 seconds)
+
+**Requirements:**
+- Gumdrops in inventory
+- Access to Gummy Bear's Lair
+
+**Collection Process:**
+
+<Steps>
+  <Step title="Open Inventory">
+    ```ahk
+    ; From natro_macro.ahk:12300  
+    nm_OpenMenu("itemmenu")
+    ```
+    Opens item menu to access gumdrops
+  </Step>
+
+  <Step title="Find Gumdrops">
+    ```ahk
+    ; From natro_macro.ahk:12307-12310
+    if ((gumdropPos := nm_InventorySearch("gumdrops")) = 0) {
+        nm_OpenMenu()
+        continue
+    }
+    ```
+    Searches inventory for gumdrop item
+  </Step>
+
+  <Step title="Travel to Lair">
+    Path: `nm_gotoCollect("gluedis", 0)` (no wait for end)
+    
+    Drag gumdrop to center of screen while traveling
+  </Step>
+
+  <Step title="Enter Lair">
+    ```ahk
+    ; From natro_macro.ahk:12320-12324
+    movement := nm_Walk(6, FwdKey)
+    nm_createWalk(movement)
+    KeyWait "F14", "D T5 L"
+    KeyWait "F14", "T20 L"  
+    nm_endWalk()
+    ```
+    Walks forward into Gummy Lair
+  </Step>
+
+  <Step title="Collect">
+    Searches for E button and collects from dispenser
+  </Step>
+
+  <Step title="Update Timer">
+    ```ahk
+    LastGlueDis:=nowUnix()
+    IniWrite LastGlueDis, "settings\nm_config.ini", "Collect", "LastGlueDis"
+    ```
+  </Step>
+</Steps>
+
+<Warning>
+Glue Dispenser requires gumdrops. If you run out, the macro will skip collection until you have more.
+</Warning>
+
+### Royal Jelly Dispenser
+
+**Cooldown:** 22 hours (79,200 seconds)
+
+**Requirements:**
+- Move Method must be "Cannon" (not "Walk")
+
+**Collection Process:**
+
+```ahk
+; From natro_macro.ahk:12340-12367
+nm_RoyalJellyDis(){
+    global RoyalJellyDisCheck, LastRoyalJellyDis
+    if (RoyalJellyDisCheck && (nowUnix()-LastRoyalJellyDis)>(79200) 
+        && (MoveMethod != "Walk")) {
+        Loop 2 {
+            nm_Reset()
+            nm_setStatus("Traveling", "Royal Jelly Dispenser")
+            nm_gotoCollect("royaljellydis")
+            
+            searchRet := nm_imgSearch("e_button.png",30,"high")
+            If (searchRet[1] = 0) {
+                sendinput "{" SC_E " down}"
+                Sleep 100
+                sendinput "{" SC_E " up}"
+                Sleep 500
+                nm_setStatus("Collected", "Royal Jelly Dispenser")
+                sleep 10000  ; Wait 10 seconds after collection
+                break
+            }
+        }
+        LastRoyalJellyDis:=nowUnix()
+        IniWrite LastRoyalJellyDis, "settings\nm_config.ini", "Collect", "LastRoyalJellyDis"
+    }
+}
+```
+
+<Note>
+Royal Jelly Dispenser has a 10-second wait after collection and requires cannon travel method.
+</Note>
+
+## Blender System
+
+The Blender is a special collection point that crafts items over time.
+
+### Configuration
+
+**Blender GroupBox** (Collect tab):
+
+<Steps>
+  <Step title="Add Items">
+    Click "Add" buttons to configure up to 3 item slots:
+    - Select item from scrollable list
+    - Set amount (1-999)
+    - Set repeat count (1-999 or Infinite)
+  </Step>
+
+  <Step title="Item Selection">
+    Use left/right arrows to browse available items:
+    - Blueberries
+    - Strawberries  
+    - Pineapples
+    - Sunflower Seeds
+    - Royal Jellies
+    - And many more...
+  </Step>
+
+  <Step title="Configure Amounts">
+    - **Amount**: How many items to add per craft
+    - **Repeat**: How many times to craft this item
+    - **Infinite**: Never stop crafting this item
+  </Step>
+</Steps>
+
+### Blender Settings
+
+```ini
+; In nm_config.ini [Blender]
+BlenderRot=1              ; Current rotation slot (1-3)
+BlenderCheck=1            ; Auto-enable if any slot has items
+TimerInterval=0           ; Calculated craft time
+
+; Slot 1
+BlenderItem1=Blueberry
+BlenderAmount1=5          ; Craft 5 blueberries
+BlenderIndex1=Infinite    ; Repeat infinitely
+BlenderTime1=0            ; Calculated finish time
+BlenderCount1=0
+
+; Slot 2  
+BlenderItem2=None
+BlenderAmount2=0
+BlenderIndex2=1
+BlenderTime2=0
+BlenderCount2=0
+
+; Slot 3
+BlenderItem3=None
+BlenderAmount3=0
+BlenderIndex3=1
+BlenderTime3=0
+BlenderCount3=0
+```
+
+### How Blender Works
+
+<Steps>
+  <Step title="Rotation System">
+    Blender cycles through slots 1 → 2 → 3 → 1:
+    ```ahk
+    ; From natro_macro.ahk:11938-11950
+    nm_BlenderRotation() {
+        loop {
+            if ((BlenderIndex%BlenderRot% = "Infinite" || BlenderIndex%BlenderRot% > 0) 
+                && (BlenderItem%BlenderRot% != "None")) {
+                BlenderCheck := 1
+                break
+            } else {
+                BlenderRot := Mod(BlenderRot, 3) + 1
+                if (A_Index = 4) {
+                    BlenderCheck := 0
+                }
+            }
+        }
+    }
+    ```
+  </Step>
+
+  <Step title="Timer Calculation">
+    Each item takes 5 minutes (300 seconds) to craft:
+    ```ahk
+    ; From natro_macro.ahk:11856
+    BlenderTime%BlenderRot% := BlenderAmount%BlenderRot% * 300
+    ```
+    Example: 5 blueberries = 25 minutes
+  </Step>
+
+  <Step title="Travel and Craft">
+    When timer expires:
+    - Travels to Blender using `nm_gotoCollect("Blender")`
+    - Opens Blender UI
+    - Checks for existing craft (Cancel or End Craft button)
+  </Step>
+
+  <Step title="Item Selection">
+    - Scrolls through Blender menu to find item
+    - Clicks item slot to select
+    - Adds configured amount
+    - Confirms craft
+  </Step>
+
+  <Step title="Rotation Advance">
+    ```ahk
+    ; From natro_macro.ahk:11878-11883
+    BlenderRot := Mod(BlenderRot, 3) + 1
+    nm_BlenderRotation()
+    if (BlenderIndex%BlenderRot% != "Infinite") {
+        BlenderIndex%BlenderRot%--
+    }
+    ```
+    Moves to next slot and decrements repeat counter
+  </Step>
+</Steps>
+
+### Blender Detection
+
+The macro uses image search to:
+
+1. **Find Item**: `Gdip_ImageSearch()` for item bitmap (e.g., "BlueberryB")
+2. **Check Availability**: Detects "NoItems" bitmap if out of stock
+3. **Handle Existing Craft**: Detects "CancelCraft", "EndCraftR", "EndCraftG" buttons
+
+```ahk
+; From natro_macro.ahk:11817-11838
+if (Gdip_ImageSearch(BlenderSS, bitmaps[BlenderIMG], , , , , , 2, , 4) > 0)
+{
+    if (Gdip_ImageSearch(BlenderSS, bitmaps["NoItems"], , , , , , 2) > 0) {
+        ; Out of items, clear slot
+        BlenderItem%BlenderRot% := "None"
+        BlenderAmount%BlenderRot% := 0
+        BlenderIndex%BlenderRot% := 1
+        nm_BlenderRotation()
+        break
+    }
+    ; Found item, add to craft
+}
+```
+
+<Warning>
+If the Blender runs out of an item, that slot will be automatically cleared and skipped.
+</Warning>
+
+### Blender GUI Controls
+
+From `natro_macro.ahk:3044-3070`:
+
+- `BlenderAdd1/2/3` - Add or Clear buttons for each slot
+- `BlenderItem1/2/3Picture` - Shows item icon  
+- `BlenderData1/2/3` - Shows "(Amount) [Repeat]" text
+- `BlenderAmount` - UpDown for amount selection
+- `BlenderIndex` - UpDown for repeat count
+- `BlenderIndexOption` - "Infinite" checkbox
+- `BlenderLeft/Right` - Browse items
+- `BlenderAddSlot` - Confirm item addition
+
+## Collection Timing
+
+### Execution Order
+
+Dispensers are collected in this sequence:
+
+```ahk
+; From natro_macro.ahk:11681-11689  
+nm_Blender()
+nm_HoneyDis()
+nm_TreatDis()
+nm_BlueberryDis()
+nm_StrawberryDis()
+; (Coconut, Glue, RJ called elsewhere)
+```
+
+### Cooldown Checking
+
+Each dispenser function checks:
+
+1. **Enabled**: `[Dispenser]Check = 1`
+2. **Cooldown**: `(nowUnix() - Last[Dispenser]) > cooldown`
+3. **Special Conditions**: Movement method, item requirements, etc.
+
+```ahk
+; Example pattern
+if (DispenserCheck && (nowUnix()-LastDispenser)>cooldown) {
+    ; Collect dispenser
+}
+```
+
+## Best Practices
+
+<Tip>
+**Enable All Basic Dispensers**
+- Honey and Treat (1 hour) provide frequent free items
+- Blueberry and Strawberry (4 hours) are useful for crafting
+- Very low overhead, always beneficial
+</Tip>
+
+<Tip>
+**Advanced Dispensers**
+- Royal Jelly requires cannon method - ensure it's configured
+- Glue requires gumdrops - keep a stockpile
+- Coconut requires field unlock - enable once accessible  
+</Tip>
+
+<Tip>
+**Blender Strategy**
+- Start with one infinite slot (commonly needed item)
+- Add finite slots for specific crafting goals
+- Use Infinite sparingly - it never stops
+- Check periodically to ensure items are in stock
+</Tip>
+
+<Tip>
+**Timing Optimization**
+- 1-hour dispensers: Check very frequently
+- 4-hour dispensers: Coordinate with field rotations
+- 22-hour dispensers: Once per day is sufficient
+- Blender: Set amounts based on how often you want to collect
+</Tip>
+
+## Troubleshooting  
+
+### Dispenser Not Collecting
+
+- Verify checkbox is enabled in GUI
+- Check `Last[Dispenser]` timestamp in config
+- Ensure cooldown has passed
+- Royal Jelly: Verify cannon method is enabled
+- Glue: Check gumdrop inventory
+- Coconut: Verify field is unlocked
+
+### Blender Issues
+
+**Not Crafting:**
+- Check `BlenderCheck` in config (should be 1)
+- Verify at least one slot has a valid item
+- Check `BlenderIndex` - must be > 0 or "Infinite"
+- Review `BlenderTime` values
+
+**Wrong Item Crafted:**
+- Verify item selection in GUI
+- Check `BlenderItem1/2/3` in config
+- Ensure image detection is working (check bitmaps)
+
+**Out of Items:**
+- Slot will auto-clear when items depleted
+- Refill items in-game
+- Re-add the slot in GUI
+
+**Stuck on One Slot:**
+- Check other slots have valid items
+- Verify `BlenderRot` rotation is advancing
+- Review `BlenderIndex` counts
+
+### Collection Fails
+
+- E button not detected: Movement path may be incorrect
+- Timeout issues: Network lag, check connection
+- Death during collection: Avoid dangerous areas
+- Disconnection: Enable reconnect features
+
+### Timer Incorrect
+
+- Timestamps stored as Unix time in config
+- Can manually edit if stuck
+- Restart macro to reload timers
+- Check system clock is accurate
+
+## Discord Notifications
+
+When Discord integration is enabled, dispenser collections can trigger notifications:
+
+- **Machine SS Check**: Screenshots on dispenser collection
+- **Status Updates**: Posts collection confirmations
+- **Error Alerts**: Notifies if collection fails
+
+See the [Discord Integration guide](/guides/discord-integration) for setup details.
+
+## Statistics
+
+Dispenser collections are tracked:
+
+```ini  
+[Status]
+; Timers visible in Status tab
+HoneyDis=Ready / 45m 30s
+TreatDis=Ready
+BlueberryDis=3h 15m 20s
+; etc.
+```
+
+Blender shows:
+- Current slot crafting
+- Time until completion  
+- Remaining repeats for each slot
+
+<Note>
+View real-time status in the GUI Status tab or through Discord status commands.
+</Note>

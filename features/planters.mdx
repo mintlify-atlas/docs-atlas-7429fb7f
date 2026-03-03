@@ -1,0 +1,502 @@
+---
+title: Planter management
+description: Automate planter placement, harvesting, and nectar collection with intelligent timing and field selection
+---
+
+Natro Macro can automatically manage your planters, placing them in optimal fields for nectar collection, tracking harvest times, and collecting them when ready.
+
+## Planter system overview
+
+The macro supports managing up to 3 planters simultaneously, with two modes:
+
+<CardGroup cols={2}>
+  <Card title="Auto mode" icon="wand-magic-sparkles">
+    Automatically selects planters and fields based on nectar priorities and available planters in inventory.
+  </Card>
+  <Card title="Manual mode" icon="hand">
+    Define custom cycles of planters and fields with precise control over placement strategy.
+  </Card>
+</CardGroup>
+
+## Available planters
+
+<Tabs>
+  <Tab title="Basic planters">
+    **Plastic Planter**
+    - Growth time: 2 hours
+    - Nectar bonus: 1x
+    - Speed bonus: 1x
+    
+    **Candy Planter**
+    - Growth time: 4 hours
+    - Nectar bonus: 1x
+    - Speed bonus: 1x
+    - Bonus in specific fields
+  </Tab>
+  
+  <Tab title="Clay planters">
+    **Blue Clay Planter**
+    - Growth time: ~5-6 hours
+    - Nectar bonus: 1.2x
+    - Speed bonus: 1.1-1.2x
+    - Best in blue fields
+    
+    **Red Clay Planter**
+    - Growth time: ~5-6 hours  
+    - Nectar bonus: 1.2x
+    - Speed bonus: 1.1-1.2x
+    - Best in red fields
+  </Tab>
+  
+  <Tab title="Advanced planters">
+    **Tacky Planter**
+    - Growth time: 5-8 hours
+    - Nectar bonus: 1.25x
+    - Speed bonus: 1x-1.5x
+    
+    **Pesticide Planter**
+    - Growth time: 6-10 hours
+    - Nectar bonus: 1x-1.3x
+    - Speed bonus: 1x-1.6x
+    - Bonus near bugs
+    
+    **Heat-Treated Planter**
+    - Growth time: 9-12 hours
+    - Nectar bonus: 1x-1.4x
+    - Speed bonus: 1x-1.46x
+    - 40% faster near red flowers
+    
+    **Hydroponic Planter**
+    - Growth time: 8-12 hours
+    - Nectar bonus: 1x-1.4x
+    - Speed bonus: 1x-1.42x
+    - 40% faster near blue flowers
+  </Tab>
+  
+  <Tab title="Special planters">
+    **Petal Planter**
+    - Growth time: 9-14 hours
+    - Nectar bonus: 1x-1.5x
+    - Speed bonus: 1x-1.5x
+    - Best in comforting/satisfying fields
+    
+    **Planter of Plenty**
+    - Growth time: 10-16 hours
+    - Nectar bonus: 1.5x
+    - Speed bonus: 1x-1.5x
+    - Best overall planter
+    
+    **Paper Planter**
+    - Growth time: 1 hour
+    - Nectar bonus: 0.75x
+    - Fast but low yield
+    
+    **Ticket Planter**
+    - Growth time: 2 hours
+    - Nectar bonus: 2x
+    - Speed bonus: 1x
+    - Best for quick nectar
+  </Tab>
+</Tabs>
+
+## Auto mode configuration
+
+### Basic settings
+
+```ahk
+PlanterMode = 0                        // 0 = Auto, 1 = Manual
+MaxAllowedPlanters = 3                 // Max planters to use (1-3)
+HarvestInterval = 2                    // Hours between checks
+AutomaticHarvestInterval = 0           // Auto-adjust interval
+HarvestFullGrown = 0                   // Only harvest at 100%
+```
+
+### Nectar priorities
+
+<Info>
+The macro uses a priority system to decide which nectar types to farm:
+</Info>
+
+```ahk
+nPreset = "Blue"                       // Preset: Blue/Red/White/Petal
+
+// Priority order (1 = highest priority)
+n1priority = "Comforting"
+n2priority = "Motivating"  
+n3priority = "Satisfying"
+n4priority = "Refreshing"
+n5priority = "Invigorating"
+
+// Minimum harvest percentage per nectar
+n1minPercent = 70
+n2minPercent = 80
+n3minPercent = 80
+n4minPercent = 80
+n5minPercent = 40
+```
+
+### Nectar field mapping
+
+<CodeGroup>
+```ahk Comforting Nectar
+ComfortingFields := ["Dandelion", "Bamboo", "Pine Tree"]
+```
+
+```ahk Refreshing Nectar
+RefreshingFields := ["Coconut", "Strawberry", "Blue Flower"]
+```
+
+```ahk Satisfying Nectar
+SatisfyingFields := ["Pineapple", "Sunflower", "Pumpkin"]
+```
+
+```ahk Motivating Nectar
+MotivatingFields := ["Stump", "Spider", "Mushroom", "Rose"]
+```
+
+```ahk Invigorating Nectar  
+InvigoratingFields := ["Pepper", "Mountain Top", "Clover", "Cactus"]
+```
+</CodeGroup>
+
+### Field selection
+
+<Accordion title="Enable/disable specific fields">
+```ahk
+BambooFieldCheck = 0
+BlueFlowerFieldCheck = 1
+CactusFieldCheck = 1
+CloverFieldCheck = 1
+CoconutFieldCheck = 0
+DandelionFieldCheck = 1
+MountainTopFieldCheck = 0
+MushroomFieldCheck = 0
+PepperFieldCheck = 1
+PineTreeFieldCheck = 1
+PineappleFieldCheck = 1
+PumpkinFieldCheck = 0
+RoseFieldCheck = 1
+SpiderFieldCheck = 1
+StrawberryFieldCheck = 1
+StumpFieldCheck = 0
+SunflowerFieldCheck = 1
+```
+
+Disable fields you can't access or want to avoid.
+</Accordion>
+
+### Planter type toggles
+
+```ahk
+PlasticPlanterCheck = 1
+CandyPlanterCheck = 1
+BlueClayPlanterCheck = 1
+RedClayPlanterCheck = 1
+TackyPlanterCheck = 1
+PesticidePlanterCheck = 1
+HeatTreatedPlanterCheck = 0
+HydroponicPlanterCheck = 0
+PetalPlanterCheck = 0
+PaperPlanterCheck = 0
+TicketPlanterCheck = 0
+PlanterOfPlentyCheck = 0
+```
+
+<Tip>
+Enable only planters you have in your inventory for optimal auto-selection.
+</Tip>
+
+## Manual mode configuration
+
+Manual mode allows precise control over planter cycles:
+
+### Cycle structure
+
+```ahk
+PlanterMode = 1                        // Enable manual mode
+MHarvestInterval = "2 hours"           // Manual harvest interval
+
+// Slot 1 - Cycle 1
+MSlot1Cycle1Planter = "BlueClayPlanter"
+MSlot1Cycle1Field = "Blue Flower"
+MSlot1Cycle1Glitter = 0
+MSlot1Cycle1AutoFull = "Timed"         // Timed/Full
+
+// Slot 1 - Cycle 2  
+MSlot1Cycle2Planter = "PetalPlanter"
+MSlot1Cycle2Field = "Dandelion"
+MSlot1Cycle2Glitter = 1
+MSlot1Cycle2AutoFull = "Full"
+```
+
+### Cycle options
+
+<AccordionGroup>
+  <Accordion title="AutoFull modes">
+    **Timed** - Harvest based on `MHarvestInterval`
+    
+    **Full** - Wait for planter to reach 100% growth
+    
+    ```ahk
+    MSlot1Cycle1AutoFull = "Timed"     // Harvest every 2 hours
+    MSlot2Cycle3AutoFull = "Full"      // Wait for full growth
+    ```
+  </Accordion>
+  
+  <Accordion title="Glitter">
+    Enable glitter usage for specific cycles:
+    
+    ```ahk
+    MSlot1Cycle1Glitter = 0            // No glitter
+    MSlot1Cycle2Glitter = 1            // Use glitter
+    ```
+    
+    <Warning>
+    Glitter increases nectar yield by 2.5x but consumes glitter from inventory.
+    </Warning>
+  </Accordion>
+  
+  <Accordion title="Hold and Puff modes">
+    Advanced manual planter controls:
+    
+    ```ahk
+    MPlanterHold1 = 0                  // Hold planter (don't auto-harvest)
+    MPlanterSmoking1 = 0               // Puff mode (harvest immediately)
+    MPuffMode1 = 0                     // Enable puff mode automation
+    ```
+  </Accordion>
+</AccordionGroup>
+
+### Example cycle
+
+<CodeGroup>
+```ahk Blue Flower Cycle
+// 9-cycle rotation for blue nectar
+MSlot1Cycle1Planter = "BlueClayPlanter"
+MSlot1Cycle1Field = "Blue Flower"
+MSlot1Cycle1AutoFull = "Timed"
+
+MSlot1Cycle2Planter = "HydroponicPlanter"  
+MSlot1Cycle2Field = "Pine Tree"
+MSlot1Cycle2AutoFull = "Full"
+
+MSlot1Cycle3Planter = "TackyPlanter"
+MSlot1Cycle3Field = "Bamboo"
+MSlot1Cycle3AutoFull = "Timed"
+```
+
+```ahk Mixed Nectar Cycle
+// Balanced rotation
+MSlot1Cycle1Planter = "PetalPlanter"
+MSlot1Cycle1Field = "Dandelion"
+MSlot1Cycle1Glitter = 1
+
+MSlot1Cycle2Planter = "PlanterOfPlenty"
+MSlot1Cycle2Field = "Pineapple"  
+MSlot1Cycle2Glitter = 1
+
+MSlot1Cycle3Planter = "RedClayPlanter"
+MSlot1Cycle3Field = "Strawberry"
+MSlot1Cycle3Glitter = 0
+```
+</CodeGroup>
+
+## Planter timing
+
+The macro tracks planter harvest times in the configuration:
+
+```ahk
+// Slot data
+PlanterName1 = "None"                  // Currently placed planter
+PlanterField1 = "None"                 // Field it's placed in
+PlanterNectar1 = "None"                // Nectar type
+PlanterHarvestTime1 = 2147483647       // Unix timestamp for harvest
+PlanterEstPercent1 = 0                 // Estimated growth %
+
+// Glitter tracking
+PlanterGlitter1 = 0                    // Glitter used (0/1)
+PlanterGlitterC1 = 0                   // Glitter count
+
+// Manual mode flags  
+PlanterHarvestNow1 = 0                 // Force harvest flag
+PlanterManualCycle1 = 1                // Current cycle number
+```
+
+### Harvest timing logic
+
+The macro uses `PlanterTimers.ahk` to display and manage planter timers:
+
+<Accordion title="PlanterTimers.ahk functionality">
+```ahk
+// Calculate remaining time
+p1timer := PlanterHarvestTime1 - nowUnix()
+
+// Display format
+TimersGui["p1timer"].Text := DurationFromSeconds(p1timer, 
+    (p1timer > 360000) ? "'No Planter'" : 
+    (p1timer > 0) ? "h'h' m'm' s's'" : 
+    ((MPlanterSmoking1) && (PlanterMode = 1)) ? "'Smoking'" :
+    ((MPlanterHold1) && (PlanterMode = 1)) ? "'Holding'" : 
+    "'Ready'"
+)
+```
+
+Timer states:
+- **No Planter** - Slot is empty
+- **h:m:s** - Time remaining until harvest
+- **Ready** - Planter is ready to harvest
+- **Smoking** - Puff mode active
+- **Holding** - Manual hold active
+</Accordion>
+
+## Planter optimization
+
+### Best planter per field
+
+<Info>
+Each field has optimal planters based on nectar bonus and growth speed:
+</Info>
+
+<Tabs>
+  <Tab title="Blue Flower">
+    1. Hydroponic Planter (1.883x effective)
+    2. Planter of Plenty (1.5x)
+    3. Tacky Planter (1.5x)
+    4. Blue Clay Planter (1.407x)
+  </Tab>
+  
+  <Tab title="Dandelion">
+    1. Petal Planter (2.135x effective)
+    2. Tacky Planter (1.875x)
+    3. Planter of Plenty (1.5x)
+    4. Hydroponic Planter (1.468x)
+  </Tab>
+  
+  <Tab title="Sunflower">
+    1. Petal Planter (2.012x effective)
+    2. Tacky Planter (1.875x)
+    3. Planter of Plenty (1.5x)
+    4. Pesticide Planter (1.3x)
+  </Tab>
+  
+  <Tab title="Spider">
+    1. Pesticide Planter (2.08x effective)
+    2. Petal Planter (1.5x)
+    3. Planter of Plenty (1.5x)
+    4. Heat-Treated Planter (1.4x)
+  </Tab>
+</Tabs>
+
+### Harvest strategies
+
+<AccordionGroup>
+  <Accordion title="Maximize nectar per hour">
+    Use fast planters with high bonuses:
+    - Ticket Planter (2x nectar, 2 hours)
+    - Plastic Planter (1x nectar, 2 hours)
+    - Paper Planter (0.75x nectar, 1 hour)
+    
+    Set `HarvestInterval = 2` for frequent checks.
+  </Accordion>
+  
+  <Accordion title="Maximize total nectar">
+    Use slow planters and wait for 100%:
+    - Planter of Plenty (1.5x base)
+    - Petal Planter (field dependent)
+    - Heat-Treated / Hydroponic Planters
+    
+    Set `HarvestFullGrown = 1` and `AutomaticHarvestInterval = 1`.
+  </Accordion>
+  
+  <Accordion title="Balance efficiency">
+    Use medium-growth planters:
+    - Tacky Planter (5-8 hours)
+    - Blue/Red Clay Planters (5-6 hours)  
+    - Candy Planter (4 hours)
+    
+    Set `HarvestInterval` to match average growth time.
+  </Accordion>
+</AccordionGroup>
+
+## Advanced settings
+
+### Gather integration
+
+```ahk
+GotoPlanterField = 0                   // Visit planter field while gathering
+GatherFieldSipping = 0                 // Gather in field with planter
+GatherPlanterLoot = 1                  // Collect planter loot
+ConvertFullBagHarvest = 0              // Convert before harvesting planters
+```
+
+<Tip>
+Enable `GatherPlanterLoot` to collect the items that drop when harvesting planters.
+</Tip>
+
+### Last planter tracking
+
+```ahk
+// Auto mode tracks last placed field per nectar
+LastComfortingField = "None"
+LastRefreshingField = "None"
+LastSatisfyingField = "None"
+LastMotivatingField = "None"
+LastInvigoratingField = "None"
+
+// Last gather slot used for planters
+LastPlanterGatherSlot = 3
+```
+
+This prevents placing multiple planters in the same field.
+
+## Planter Timers GUI
+
+The macro includes a dedicated planter timers window:
+
+<Accordion title="Timer window features">
+- **Visual indicators** - Shows planter type and field icons
+- **Nectar icons** - Displays which nectar each planter produces
+- **Countdown timers** - Real-time harvest countdown
+- **Manual controls**:
+  - **Ready** button - Force planter to ready state
+  - **Add** button - Manually add planter data
+  - **+1HR / -1HR** - Adjust harvest time
+  - **Clear** button - Remove planter from slot
+
+<Info>
+Access the timer window with the `F5` hotkey (default) or through the tray menu.
+</Info>
+</Accordion>
+
+## Troubleshooting
+
+<Warning>
+Common planter issues:
+</Warning>
+
+**Planters not being placed:**
+- Check that you have planters in inventory
+- Verify planter type is enabled in config
+- Ensure target fields are accessible and enabled
+- Check `MaxAllowedPlanters` setting
+
+**Harvest timing is off:**
+- Verify your system clock is accurate
+- Check `HarvestInterval` matches planter growth times
+- For manual mode, ensure cycles have correct `AutoFull` settings
+- Game lag can affect placement/harvest detection
+
+**Wrong nectar type:**
+- Verify field/nectar mapping is correct
+- Check that you're placing in the intended field
+- Some fields produce multiple nectar types based on location
+
+**Glitter not being used:**
+- Ensure you have glitter in inventory
+- Check `MSlot#Cycle#Glitter = 1` for manual mode
+- Glitter must be applied when placing the planter
+
+**Lost planters:**
+- Check the `LostPlanters` variable in status
+- Planters may not be detected if placed manually
+- Use the Timer GUI to manually add lost planters

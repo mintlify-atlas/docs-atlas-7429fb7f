@@ -1,0 +1,348 @@
+---
+title: "Main Script Reference"
+description: "Technical reference for natro_macro.ahk - the main entry point and control script for Natro Macro"
+---
+
+## Overview
+
+The `natro_macro.ahk` script is the main entry point for Natro Macro, handling initialization, GUI creation, configuration management, and the primary macro execution loop.
+
+**Location:** `submacros/natro_macro.ahk`
+
+**Requirements:**
+- AutoHotkey v2.0+ (32-bit)
+- Windows with 100% Display Scale (96 DPI)
+- Administrator privileges (if running in protected directories)
+
+## Version Information
+
+<ParamField path="VersionID" type="string" default="1.1.1">
+  Current version identifier for the macro
+</ParamField>
+
+## Script Initialization
+
+### Architecture Check
+
+The script enforces 32-bit execution for compatibility with Roblox automation.
+
+```ahk
+RunWith32()
+```
+
+<ResponseField name="RunWith32" type="function">
+  Ensures the script runs with AutoHotkey 32-bit. If running on 64-bit, automatically relaunches with `AutoHotkey32.exe`.
+  
+  **Behavior:**
+  - Checks `A_PtrSize != 4` to detect 64-bit execution
+  - Searches for `AutoHotkey32.exe` in the AHK directory
+  - Calls `ReloadScript()` with 32-bit executable path
+  - Exits if 32-bit version not found
+</ResponseField>
+
+### Elevation Check
+
+```ahk
+ElevateScript()
+```
+
+<ResponseField name="ElevateScript" type="function">
+  Verifies write permissions in the script directory by attempting to open `submacros\Heartbeat.ahk` in append mode.
+  
+  **Behavior:**
+  - Tests file write access
+  - Requests UAC elevation if permissions denied
+  - Shows error message if elevation fails or directory is read-only
+  - Prevents execution in restricted directories
+</ResponseField>
+
+## Executable Paths
+
+```ahk
+exe_path32 := A_AhkPath
+exe_path64 := (A_Is64bitOS && FileExist("submacros\\AutoHotkey64.exe")) 
+  ? (A_WorkingDir "\\submacros\\AutoHotkey64.exe") 
+  : A_AhkPath
+```
+
+These paths are used for spawning submacros and background processes.
+
+## OnMessage Handlers
+
+Natro Macro uses Windows message passing for inter-process communication between the main script, background monitor, and other submacros.
+
+### Message Protocol
+
+```ahk
+OnMessage(0x004A, nm_WM_COPYDATA)        // WM_COPYDATA - string data transfer
+OnMessage(0x5550, nm_ForceLabel, 255)   // Force execution of a label
+OnMessage(0x5551, nm_setShiftLock, 255) // Set shift lock state
+OnMessage(0x5552, nm_setGlobalInt, 255) // Set global integer variable
+OnMessage(0x5553, nm_setGlobalStr, 255) // Set global string variable
+OnMessage(0x5555, nm_backgroundEvent, 255) // Background event notification
+OnMessage(0x5556, nm_sendHeartbeat)     // Heartbeat signal
+OnMessage(0x5557, nm_ForceReconnect)    // Trigger reconnection
+OnMessage(0x5558, nm_AmuletPrompt)      // Amulet decision prompt
+OnMessage(0x5559, nm_FindItem)          // Find item in inventory
+OnMessage(0x5560, nm_copyDebugLog)      // Copy debug logs
+OnMessage(0x0020, nm_WM_SETCURSOR)      // Cursor state management
+```
+
+<ParamField path="0x004A" type="WM_COPYDATA">
+  Standard Windows message for sending string data between processes. Used by background script to send status messages like "Detected: Night" or "You Died".
+</ParamField>
+
+<ParamField path="0x5550" type="nm_ForceLabel">
+  Forces execution of a specific label/function in the main script.
+  
+  **Parameters:**
+  - `wParam`: Label identifier
+  - Priority: 255 (highest)
+</ParamField>
+
+<ParamField path="0x5551" type="nm_setShiftLock">
+  Controls shift lock state for movement.
+  
+  **Parameters:**
+  - `wParam`: State (0=off, 1=on)
+  - Priority: 255
+</ParamField>
+
+<ParamField path="0x5552" type="nm_setGlobalInt">
+  Sets a global integer variable.
+  
+  **Parameters:**
+  - `wParam`: Variable index
+  - `lParam`: Integer value
+  - Priority: 255
+</ParamField>
+
+<ParamField path="0x5553" type="nm_setGlobalStr">
+  Sets a global string variable.
+  
+  **Parameters:**
+  - `wParam`: Variable index
+  - `lParam`: String value
+  - Priority: 255
+</ParamField>
+
+<ParamField path="0x5555" type="nm_backgroundEvent">
+  Receives events from background monitoring script (death detection, guid detection, etc.).
+  
+  **Parameters:**
+  - `wParam`: Event type (1=death, 4=backpack%, 5=backpack%filtered, 6=guid, 7=popstar, 8=popstar_active)
+  - `lParam`: Event data
+  - Priority: 255
+</ParamField>
+
+<ParamField path="0x5556" type="nm_sendHeartbeat">
+  Heartbeat signal to confirm script is alive.
+</ParamField>
+
+<ParamField path="0x5557" type="nm_ForceReconnect">
+  Triggers a forced reconnection to Roblox.
+</ParamField>
+
+<ParamField path="0x5558" type="nm_AmuletPrompt">
+  Displays amulet selection prompt.
+  
+  **Parameters:**
+  - `decision`: Amulet choice
+  - `type`: Prompt type
+</ParamField>
+
+<ParamField path="0x5559" type="nm_FindItem">
+  Searches for an item in the inventory.
+  
+  **Parameters:**
+  - `chosenItem`: Item name to find
+</ParamField>
+
+<ParamField path="0x5560" type="nm_copyDebugLog">
+  Copies debug logs to clipboard.
+</ParamField>
+
+## Configuration Structure
+
+The macro uses a nested Map structure to store all settings.
+
+### Configuration Import
+
+```ahk
+nm_importConfig()
+```
+
+<ResponseField name="nm_importConfig" type="function">
+  Loads configuration from INI file or creates defaults. Configuration is organized into sections:
+  
+  **Sections:**
+  - `Settings` - Core macro settings (movement speed, server, reconnect, hotkeys)
+  - `Status` - Runtime statistics and Discord integration
+  - `Gather` - Field gathering configuration (patterns, times, rotations)
+  - `Boost` - Booster activation settings
+  - `Collect` - Collection task configuration
+  - `Planters` - Planter management settings
+  - `Quest` - Quest automation configuration
+  - `Shrine` - Wind shrine settings
+  - `GUI` - GUI state and preferences
+</ResponseField>
+
+### Key Configuration Values
+
+<ParamField path="MoveSpeedNum" type="integer" default="28">
+  Base movement speed in studs per second (affected by haste, bear morphs, etc.)
+</ParamField>
+
+<ParamField path="MoveMethod" type="string" default="Cannon">
+  Method for returning to hive: "Cannon" or "Walk"
+</ParamField>
+
+<ParamField path="PrivServer" type="string">
+  Private server link for auto-reconnect
+</ParamField>
+
+<ParamField path="ReconnectMethod" type="string" default="Deeplink">
+  Reconnection method: "Deeplink" or "Browser"
+</ParamField>
+
+<ParamField path="HiveSlot" type="integer" default="6">
+  Hive slot number (1-6)
+</ParamField>
+
+## Pattern and Path Import
+
+### Pattern Import
+
+```ahk
+nm_importPatterns()
+```
+
+<ResponseField name="nm_importPatterns" type="function">
+  Imports gathering patterns from the `patterns/` directory.
+  
+  **Security Features:**
+  - Validates pattern syntax before import
+  - Warns about deprecated patterns using `patterns[...]` syntax
+  - Hashes patterns to detect changes
+  - Shows security warning for new/modified patterns
+  - Validates patterns by executing them in a sandbox with `/Validate /ErrorStdOut`
+  
+  **Storage:**
+  - Imported patterns cached in `settings/imported/patterns.ahk`
+  - Pattern hashes stored in `settings/imported/patternHashes.ahk`
+  - Patterns accessible via global `patterns` Map (case-insensitive)
+  - Pattern names stored in global `patternlist` Array
+</ResponseField>
+
+### Path Import
+
+```ahk
+nm_importPaths()
+```
+
+<ResponseField name="nm_importPaths" type="function">
+  Imports movement paths from the `paths/` directory.
+  
+  **Path Types:**
+  - `gtb` - Go to booster (blue, mountain, red)
+  - `gtc` - Go to collect (machines, beesmas items, events)
+  - `gtf` - Go to field (all 17 fields)
+  - `gtp` - Go to planter (all 17 fields)
+  - `gtq` - Go to questgiver (black, brown, bucko, honey, polar, riley)
+  - `wf` - Walk from field to hive (all 17 fields)
+  
+  **Storage:**
+  - Paths stored in global `paths` Map with nested structure
+  - Example: `paths["gtf"]["sunflower"]` for Sunflower field path
+  - Validates deprecated syntax and missing files
+</ResponseField>
+
+## Key Variables
+
+### Scan Codes
+
+Movement and action keys are defined using scan codes for reliability:
+
+```ahk
+FwdKey := "sc011"    // W
+LeftKey := "sc01e"   // A
+BackKey := "sc01f"   // S
+RightKey := "sc020"  // D
+RotLeft := "sc033"   // ,
+RotRight := "sc034"  // .
+RotUp := "sc149"     // PgUp
+RotDown := "sc151"   // PgDn
+ZoomIn := "sc017"    // I
+ZoomOut := "sc018"   // O
+SC_E := "sc012"      // E
+SC_R := "sc013"      // R
+SC_L := "sc026"      // L
+SC_Esc := "sc001"    // Esc
+SC_Enter := "sc01c"  // Enter
+```
+
+## Coordinate Modes
+
+```ahk
+CoordMode "Mouse", "Screen"
+CoordMode "Pixel", "Screen"
+SendMode "Event"
+```
+
+All coordinate operations use screen-relative positioning for consistency.
+
+## Main Loop Structure
+
+The main script execution follows this flow:
+
+1. **Initialization**
+   - Check AHK version and architecture
+   - Elevate privileges if needed
+   - Close remnant processes
+   - Start Heartbeat script
+   - Import patterns and paths
+   - Load configuration
+
+2. **GUI Creation**
+   - Build main interface
+   - Attach event handlers
+   - Load saved GUI state
+
+3. **Main Execution Loop**
+   - Check macro state (running/paused/stopped)
+   - Execute current task
+   - Handle reconnection logic
+   - Update statistics
+   - Process Discord notifications
+
+4. **Background Integration**
+   - Receive OnMessage notifications
+   - Update global state variables
+   - Respond to detection events
+
+## Debug Logging
+
+```ahk
+nm_copyDebugLog(param:="", *)
+```
+
+<ResponseField name="nm_copyDebugLog" type="function">
+  Copies comprehensive debug information to clipboard for troubleshooting.
+  
+  **Includes:**
+  - Version information
+  - System details
+  - Current configuration
+  - Recent log entries
+  - Error messages
+  
+  **Activation:**
+  - Hotkey: F6 (default, configurable)
+  - Tray menu: "Copy Logs"
+  - Debug GUI button
+</ResponseField>
+
+## See Also
+
+- [Background Script Reference](/reference/background-script) - Monitoring and detection systems
+- [Library Functions Reference](/reference/library-functions) - Utility functions and helpers

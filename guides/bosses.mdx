@@ -1,0 +1,558 @@
+---
+title: Boss Farming Guide  
+description: Configure Natro Macro to automatically farm bosses including Tunnel Bear, King Beetle, Stump Snail, Coco Crab, and Commando Chick
+---
+
+Boss farming is essential for obtaining rare items, completing quests, and progressing in Bee Swarm Simulator. Natro Macro automates the detection, travel, combat, and looting of all major bosses.
+
+## Available Bosses
+
+Natro Macro can automatically farm five boss types:
+
+| Boss | Cooldown | Location | Baby Version | Special Features |
+|------|----------|----------|--------------|------------------|
+| **Tunnel Bear** | 48 hours | Tunnel Bear's Lair | Yes | BabyLove buff support |
+| **King Beetle** | 24 hours | King Beetle's Lair | Yes | Amulet selection |
+| **Stump Snail** | 4 days | Stump Field | No | Health tracking, time limit |
+| **Coco Crab** | 36 hours | Coconut Field | No | Shell Amulet selection |
+| **Commando Chick** | 30 minutes | Commando Garrison | No | Health tracking, level system |
+
+<Note>
+Cooldown timers can be reduced by the Monster Respawn Time setting, which is calculated as: `BaseCooldown * (1 - MonsterRespawnTime/100)`
+</Note>
+
+## Configuration
+
+### Enable Boss Farming
+
+In the **Collect** tab, locate the **Bosses GroupBox** with checkboxes for each boss:
+
+<Steps>
+  <Step title="Select Bosses to Farm">
+    Check the boxes for bosses you want to farm:
+    - **King Beetle** - 24 hour respawn
+    - **Tunnel Bear** - 48 hour respawn  
+    - **Coco Crab** - 36 hour respawn
+    - **Stump Snail** - 4 day respawn
+    - **Commando** - 30 minute respawn (fastest)
+  </Step>
+
+  <Step title="Enable Baby Love (Optional)">
+    For Tunnel Bear and King Beetle:
+    - Check the small checkbox next to each boss name
+    - This enables waiting for the BabyLove buff before attacking
+    - Provides extra damage boost from baby bees
+  </Step>
+
+  <Step title="Configure Amulet Settings">
+    For King Beetle and Coco Crab:
+    - Click the amulet icon to toggle amulet mode
+    - **Keep Old** - Keeps your current amulet if better
+    - **Do Nothing** - Always takes the new amulet
+  </Step>
+</Steps>
+
+### Health Tracking (Advanced)
+
+For Stump Snail and Commando Chick:
+
+```ahk
+; Configuration in nm_config.ini
+[Collect]
+InputSnailHealth=100.00  ; Percentage of Snail's health remaining
+SnailTime=15             ; Time limit in minutes (or "Kill" for no limit)
+InputChickHealth=100.00  ; Percentage of Chick's health remaining  
+ChickLevel=10            ; Commando Chick level (determines max HP)
+ChickTime=15             ; Time limit in minutes
+```
+
+<Warning>
+Health tracking helps the macro decide when to continue or abandon a boss fight. Set realistic time limits to avoid wasting time on high-health bosses.
+</Warning>
+
+## Boss Details
+
+### Tunnel Bear
+
+**Respawn Time:** 48 hours (172,800 seconds)
+
+**Features:**
+- Optional BabyLove buff support
+- Two travel methods: Walk or Cannon
+- Automatic detection using health bars
+- Movement-based combat (backing up when too close)
+
+**Combat Strategy:**
+
+<Steps>
+  <Step title="Travel to Lair">
+    The macro navigates from the hive to Tunnel Bear's Lair using either:
+    - Walk method: Complex pathfinding through the map
+    - Cannon method: Uses cannon for faster travel
+  </Step>
+
+  <Step title="Wait for BabyLove (Optional)">
+    If enabled, waits up to 30 seconds for the BabyLove buff to appear
+    
+    ```ahk
+    ; From natro_macro.ahk:15254-15263
+    if (TunnelBearBabyCheck){
+        nm_setStatus("Waiting", "BabyLove Buff")
+        loop 30{
+            if (nm_imgSearch("blove.png",25,"buff")[1] = 0){
+                break
+            }
+            Sleep 1000
+        }
+    }
+    ```
+  </Step>
+
+  <Step title="Search for Boss">
+    Uses health detection system to locate Tunnel Bear:
+    - Checks up to 20 times (5 second timeout)
+    - If not found, schedules retry in 2 hours
+  </Step>
+
+  <Step title="Attack">
+    - Rotates camera up for better view
+    - Maintains safe distance by backing up when image detected
+    - Monitors for death image to confirm kill
+    - Timeout: 120 loops (2 minute maximum)
+  </Step>
+
+  <Step title="Loot">
+    Moves forward and backward to collect all drops
+  </Step>
+</Steps>
+
+**Retry Logic:**
+- If not found: Retry in 2 hours
+- If killed: Full cooldown before next attempt
+- Boss kill statistics updated
+
+### King Beetle  
+
+**Respawn Time:** 24 hours (86,400 seconds)
+
+**Features:**
+- Optional BabyLove buff support
+- Amulet selection system
+- Lair confirmation (checks floor texture)
+- Smart looting pattern
+
+**Combat Strategy:**
+
+<Steps>
+  <Step title="Navigate to Lair">
+    - Travels to Blue Flower Field
+    - Moves right and forward into the lair entrance
+    - Jumps to enter the lair properly
+  </Step>
+
+  <Step title="Confirm Location">
+    Searches for the King Beetle floor texture:
+    ```ahk
+    ; From natro_macro.ahk:15367-15374
+    loop 5 {
+        if (nm_imgSearch("kingfloor.png",10,"low")[1] = 0){
+            lairConfirmed:=1
+            break
+        }
+        sleep 200
+    }
+    ```
+  </Step>
+
+  <Step title="Wait for BabyLove (Optional)">
+    Similar to Tunnel Bear, waits for buff if enabled
+  </Step>
+
+  <Step title="Search and Attack">
+    - Health detection for boss location
+    - Moves in a pattern around the lair
+    - Checks multiple positions for the "king.png" death indicator
+  </Step>
+
+  <Step title="Amulet Check">
+    ```ahk
+    ; From natro_macro.ahk:15467-15468
+    if !nm_AmuletPrompt(((KingBeetleAmuletMode = 1) ? 1 : 3), "King Beetle")
+        nm_setStatus("Looting", "King Beetle"), nm_loot(13.5, 7, "right", 1)
+    ```
+    - Mode 1 (Keep Old): Compares amulets and keeps better one
+    - Mode 3 (Do Nothing): Always accepts new amulet
+  </Step>
+</Steps>
+
+**Amulet Modes:**
+- **Keep Old (Mode 1)**: Preserves your current amulet if it's superior
+- **Do Nothing (Mode 3)**: Automatically claims the new King Beetle Amulet
+
+### Stump Snail
+
+**Respawn Time:** 4 days (345,600 seconds)
+
+**Features:**
+- Health tracking system
+- Configurable time limit
+- Shell Amulet selection
+- Cycling movement pattern
+
+**Combat Strategy:**
+
+<Steps>
+  <Step title="Travel">
+    Uses `nm_gotoField("stump")` to reach Stump Field
+  </Step>
+
+  <Step title="Detection">
+    Health detection with 20 attempts (3 second timeout)
+  </Step>
+
+  <Step title="Combat Loop">
+    Unique cycling pattern:
+    ```ahk
+    ; From natro_macro.ahk:15510-15525
+    movement := (
+        nm_Walk(2.5, RightKey) "
+        " nm_Walk(2.5, FwdKey) "
+        " nm_Walk(2.5, Leftkey) "
+        " nm_Walk(5, BackKey) "
+        " nm_Walk(2.5, Leftkey) "
+        " nm_Walk(2.5, FwdKey) "
+        " nm_Walk(5, RightKey) "
+        " nm_Walk(2.5, BackKey) "
+        " nm_Walk(2.5, Leftkey) "
+        " nm_Walk(5, FwdKey) "
+        " nm_Walk(2.5, Leftkey) "
+        " nm_Walk(2.5, BackKey) "
+        " nm_Walk(2.5, Rightkey)
+    )
+    ```
+    - Continuously cycles this movement pattern
+    - Holds down attack button
+    - Monitors health changes every minute
+  </Step>
+
+  <Step title="Health Monitoring">
+    - Tracks estimated kill time based on damage dealt
+    - Compares current health to initial health
+    - Abandons if time limit exceeded or no progress
+  </Step>
+
+  <Step title="Amulet Detection">
+    ```ahk
+    ; From natro_macro.ahk:15557-15561  
+    If ((nm_AmuletPrompt(((ShellAmuletMode = 1) ? 1 : 3), "Shell")) = 1)
+    {
+        Ssdead := 1
+        break
+    }
+    ```
+    Shell Amulet drop indicates successful kill
+  </Step>
+</Steps>
+
+**Time Limits:**
+- Set `SnailTime` to a number (minutes) for time limit
+- Set to `"Kill"` to attack until defeated (no limit)
+- If time exceeded: Returns in 30 minutes to retry
+
+### Coco Crab
+
+**Respawn Time:** 36 hours (129,600 seconds)
+
+**Features:**
+- Shell Amulet selection
+- Coconut Field location
+- Health detection system
+
+**Combat Strategy:**
+
+<Steps>
+  <Step title="Travel">
+    Navigates to Coconut Field (requires field unlock)
+  </Step>
+
+  <Step title="Search">
+    Health detection up to 20 times
+  </Step>
+
+  <Step title="Attack Pattern">
+    - Stays in Coconut Field
+    - Moves in patterns to dodge attacks
+    - Monitors for Coco Crab death indicator
+  </Step>
+
+  <Step title="Loot">
+    Automatic looting in the field area
+  </Step>
+</Steps>
+
+**Retry Logic:**
+- Not found: Retry in 2 hours
+- Killed: Full cooldown applies
+
+### Commando Chick
+
+**Respawn Time:** 30 minutes (1,800 seconds)
+
+**Features:**
+- Fastest respawn time (can farm multiple times per hour)
+- Level-based health system (levels 3-10)
+- Health tracking and time limits
+- Located in Commando Garrison
+
+**Health by Level:**
+
+```ahk
+; From natro_macro.ahk:1539
+CommandoChickHealth := Map(3, 150
+    , 4, 500
+    , 5, 2000  
+    , 6, 7500
+    , 7, 30000
+    , 8, 120000
+    , 9, 500000
+    , 10, 2000000)
+```
+
+**Combat Strategy:**
+
+<Steps>
+  <Step title="Travel to Garrison">
+    Two methods supported:
+    - Walk: Complex path through the map
+    - Cannon: Faster cannon-based travel
+  </Step>
+
+  <Step title="Search">
+    Health detection in the garrison area
+  </Step>
+
+  <Step title="Attack">
+    - Cycling movement pattern (similar to Stump Snail)
+    - Health monitoring every minute
+    - Time limit enforcement
+  </Step>
+
+  <Step title="Health Tracking">
+    ```ahk
+    ; Configuration example
+    ChickLevel=10          ; Determines max HP (2,000,000 at level 10)
+    InputChickHealth=100   ; Current health percentage
+    ChickTime=15          ; Max time to fight in minutes
+    ```
+  </Step>
+</Steps>
+
+<Tip>
+Commando Chick is excellent for frequent boss kills due to the 30-minute cooldown. Set realistic time limits based on your hive strength.
+</Tip>
+
+## Baby Love Feature
+
+Baby Love is a buff from Baby Bee that increases damage:
+
+### How It Works
+
+1. Macro travels to boss location
+2. Waits for BabyLove buff to appear in buff bar
+3. Searches for `blove.png` image
+4. Timeout: 30 seconds (then proceeds anyway)
+5. Once detected or timeout, begins combat
+
+### Configuration
+
+```ahk
+; In nm_config.ini [Collect]
+TunnelBearBabyCheck=1   ; 0=disabled, 1=enabled
+KingBeetleBabyCheck=1
+```
+
+<Note>
+BabyLove increases damage significantly, making boss kills faster. However, waiting reduces farming efficiency if the buff takes too long to appear.
+</Note>
+
+## Amulet Selection
+
+King Beetle and Coco Crab drop amulets. The macro can manage these automatically:
+
+### Modes
+
+**Keep Old (Mode 1):**
+- Compares new amulet stats to current amulet
+- Only replaces if new amulet is better
+- Requires amulet detection system
+
+**Do Nothing (Mode 3):**  
+- Always claims the new amulet
+- No comparison needed
+- Faster but may replace good amulets
+
+### GUI Controls
+
+Click the amulet icon next to the boss name:
+- Shows current mode as text
+- Icon represents King Beetle Amulet or Shell Amulet
+- Toggles between modes on click
+
+```ahk
+; From natro_macro.ahk:3164
+MainGui.Add("Text", "x410 y123 w56 vKingBeetleAmuletModeText Hidden", 
+    (KingBeetleAmuletMode = 1) ? " Keep Old" : "Do Nothing")
+```
+
+## Health Tracking System
+
+For Stump Snail and Commando Chick:
+
+### How It Works
+
+<Steps>
+  <Step title="Initial Health Check">
+    Records boss health at combat start
+  </Step>
+
+  <Step title="Periodic Updates">
+    Every 60 seconds:
+    - Captures current health
+    - Compares to previous measurement
+    - Calculates damage dealt
+  </Step>
+
+  <Step title="Kill Time Estimation">
+    ```ahk
+    ; From natro_macro.ahk:15604-15608  
+    if (nm_KillTimeEstimation("Snail", LastHealthCheck) != 0)
+    {
+        KillCheck := currentTime
+    }
+    UpdateTimer := currentTime
+    ```
+    Estimates time to kill based on current DPS
+  </Step>
+
+  <Step title="Timeout Handling">
+    If time limit exceeded:
+    - Ends combat
+    - Schedules retry (30 min for Snail, immediate for Chick)
+    - Preserves health percentage for next attempt
+  </Step>
+</Steps>
+
+### Configuration Options
+
+**Stump Snail:**
+```ini
+[Collect]  
+InputSnailHealth=100.00  ; Current health (0-100%)
+SnailTime=15            ; Time limit (minutes) or "Kill"
+ShellAmuletMode=1       ; Amulet handling
+```
+
+**Commando Chick:**
+```ini
+[Collect]
+InputChickHealth=100.00  ; Current health (0-100%)
+ChickLevel=10           ; Boss level (3-10)
+ChickTime=15           ; Time limit (minutes)
+```
+
+<Warning>
+Setting time limits too low may cause premature abandonment. Set realistic limits based on your hive's strength and the boss level.
+</Warning>
+
+## Best Practices
+
+<Tip>
+**Optimize Cooldowns**
+- Farm Commando Chick frequently (30 min cooldown)
+- Prioritize King Beetle (24h) over Tunnel Bear (48h) for better drop rates
+- Don't ignore Stump Snail despite long cooldown - valuable rewards
+</Tip>
+
+<Tip>
+**BabyLove Settings**  
+- Enable for stronger bosses (Tunnel Bear, King Beetle)
+- Disable if your hive is strong enough without it
+- Consider disabling if Baby Bee is not in your hive
+</Tip>
+
+<Tip>
+**Amulet Strategy**
+- Use "Keep Old" mode if you have good amulets already
+- Use "Do Nothing" mode for auto-collection during long farming sessions
+- Manually review amulets periodically
+</Tip>
+
+<Tip>
+**Health Tracking**
+- Start with generous time limits (20-30 minutes)
+- Gradually reduce based on actual kill times  
+- Set Snail to "Kill" mode if you want guaranteed kills
+- Monitor ChickLevel setting - higher levels = much more HP
+</Tip>
+
+## Troubleshooting
+
+### Boss Not Detected
+
+- Ensure the boss checkbox is enabled
+- Check cooldown timer - may not be ready
+- Verify you meet requirements (field unlocks, etc.)
+- Check `Last[Boss]` timestamp in config file
+
+### Combat Fails
+
+- Increase time limits for Snail/Chick
+- Enable BabyLove for damage boost
+- Check bee hive strength and composition
+- Verify macro isn't dying (check DeathSSCheck)
+
+### Loot Not Collected
+
+- Boss may not have actually died
+- Movement pattern may need adjustment
+- Check for disconnections during combat
+- Review screenshot if Critical SS is enabled
+
+### Amulet Issues  
+
+- Verify amulet mode is set correctly
+- Check AmuletSSCheck for screenshots
+- Ensure detection system is working
+- Manually verify amulet in-game
+
+### Incorrect Retry Times
+
+- Check `Last[Boss]` value in config
+- Verify MonsterRespawnTime setting
+- Boss may have been killed outside macro
+- Manually edit timestamp if needed (Unix time)
+
+## Statistics Tracking
+
+Boss kills are tracked in config:
+
+```ini
+[Status]
+TotalBossKills=150      ; All-time boss kills
+SessionBossKills=5      ; Current session kills
+```
+
+Each successful kill increments both counters:
+
+```ahk
+; From natro_macro.ahk:15307-15311
+TotalBossKills:=TotalBossKills+1
+SessionBossKills:=SessionBossKills+1  
+PostSubmacroMessage("StatMonitor", 0x5555, 1, 1)
+IniWrite TotalBossKills, "settings\nm_config.ini", "Status", "TotalBossKills"
+IniWrite SessionBossKills, "settings\nm_config.ini", "Status", "SessionBossKills"
+```
+
+<Note>
+View statistics in the Status tab or through Discord integration if enabled.
+</Note>

@@ -1,80 +1,329 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quick start
+description: Get started with Natro Macro in minutes
 ---
 
-## Get started in three steps
+This guide will walk you through starting Natro Macro for the first time and running your first automated gathering session.
 
-Get your documentation site running locally and make your first customization.
+## Prerequisites
 
-### Step 1: Set up your local environment
+Before starting, make sure you have:
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
+- [Installed Natro Macro](/installation) and extracted all files
+- Set your display scale to 100% (96 DPI)
+- Verified that `AutoHotkey32.exe` exists in the `submacros` folder
+
+## Launch the macro
+
+<Steps>
+  <Step title="Run START.bat">
+    Navigate to your extracted Natro Macro folder and double-click `START.bat`
     
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
+    This launches the macro using the included AutoHotkey runtime:
     
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
+    ```batch
+    submacros\AutoHotkey32.exe submacros\natro_macro.ahk
+    ```
     
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+    <Info>
+      The macro **must** run in 32-bit mode (`AutoHotkey32.exe`) for image recognition to work correctly. `START.bat` handles this automatically.
+    </Info>
+  </Step>
+  
+  <Step title="Wait for the GUI to load">
+    The macro will:
+    - Check for the correct AutoHotkey version (32-bit)
+    - Import patterns from the `patterns/` folder
+    - Import paths from the `paths/` folder
+    - Load your configuration from `settings/` (or create default settings)
+    - Display the main GUI window
+    
+    <Warning>
+      If this is your first time running a pattern, you may see a security warning. Only accept patterns from trusted sources like the [official Discord](https://discord.gg/natromacro) or [verified GitHub repository](https://github.com/NatroTeam/Paths-Patterns).
+    </Warning>
+  </Step>
+</Steps>
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+## Initial configuration
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+When the GUI appears, configure these essential settings before starting:
 
-### Step 3: Go live
+### Settings tab
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+<Steps>
+  <Step title="Configure your hive">
+    Set your hive information:
+    
+    - **Hive Slot:** Your hive number (1-6)
+    - **Number of Bees:** How many bees you have in your hive (affects timings)
+    
+    <Note>
+      Accurate hive settings help the macro calculate optimal gathering and conversion times.
+    </Note>
+  </Step>
+  
+  <Step title="Set your private server (optional but recommended)">
+    Enter your Roblox private server link:
+    
+    - **Private Server Link:** Paste your VIP server URL
+    - **Fallback Servers:** Add backup server links (recommended)
+    - **Public Fallback:** Enable to use public servers if private servers fail
+    
+    <Tip>
+      Private servers significantly improve macro reliability by reducing disconnections and avoiding other players.
+    </Tip>
+  </Step>
+  
+  <Step title="Configure movement">
+    Set your movement preferences:
+    
+    - **Move Speed:** Default is 28 (adjust based on your bee's movement speed)
+    - **Move Method:** Choose between Cannon (recommended) or Walk
+    - **Sprinkler Type:** Select your sprinkler type (Supreme recommended)
+    
+    <Info>
+      The macro uses Cannon travel by default, which is faster than walking for most fields.
+    </Info>
+  </Step>
+</Steps>
+
+### Gather tab
+
+<Steps>
+  <Step title="Select your first field">
+    Configure Field 1:
+    
+    - **Field Name:** Choose a field (e.g., Sunflower for beginners)
+    - **Pattern:** Select a gathering pattern (Squares is a good default)
+    - **Pattern Size:** Choose S, M, or L (M is balanced)
+    - **Until Minutes:** How long to gather (20-30 minutes recommended)
+    - **Until Pack:** Pack percentage to return to hive (95% recommended)
+  </Step>
+  
+  <Step title="Add additional fields (optional)">
+    Configure Field 2 and Field 3 for field rotation:
+    
+    - Set **Field Name** to "None" if you only want to gather from one field
+    - Or configure multiple fields to rotate between them
+    
+    <Note>
+      The macro will cycle through all enabled fields (those not set to "None") in sequence.
+    </Note>
+  </Step>
+</Steps>
+
+### Convert settings
+
+<Steps>
+  <Step title="Set conversion timing">
+    Configure when the macro converts pollen to honey:
+    
+    - **Convert Balloon:** Choose when to convert ("Gather" uses gathering time, "Never" disables auto-convert)
+    - **Convert Minutes:** Minutes of gathering before converting (30 is default)
+    
+    <Tip>
+      Converting regularly prevents losing progress if you disconnect, but too frequent conversion wastes time.
+    </Tip>
+  </Step>
+</Steps>
+
+## Prepare Roblox
+
+Before starting the macro, prepare your Roblox client:
+
+<Steps>
+  <Step title="Launch Bee Swarm Simulator">
+    Open Roblox and join Bee Swarm Simulator
+    
+    - Use your private server link if configured
+    - Or join a public server
+  </Step>
+  
+  <Step title="Position your character">
+    Stand near your hive with your character facing forward
+    
+    The macro will take control from wherever you're standing
+  </Step>
+  
+  <Step title="Verify graphics settings">
+    The macro will check your Roblox settings on first run:
+    
+    Required settings:
+    - Graphics Quality: Set by macro
+    - GUI visibility: Optimized by macro
+    
+    <Warning>
+      Do not modify Roblox graphics settings manually while the macro is running.
+    </Warning>
+  </Step>
+</Steps>
+
+## Start the macro
+
+<Steps>
+  <Step title="Press F1 to start">
+    With Roblox in focus and your settings configured, press **F1** to start the macro
+    
+    Default hotkeys:
+    - **F1:** Start macro
+    - **F2:** Pause/Resume
+    - **F3:** Stop macro
+    - **F4:** Toggle auto-clicker
+    - **F5:** Show timers window
+    - **F6:** Debug information
+    
+    <Info>
+      These hotkeys can be customized in the Settings tab under "Hotkey Settings".
+    </Info>
+  </Step>
+  
+  <Step title="Watch the initial setup">
+    The macro will:
+    1. Check Roblox settings and configure graphics
+    2. Navigate to your hive
+    3. Walk to the first configured field
+    4. Begin gathering with your selected pattern
+    
+    <Note>
+      The first run may take longer as the macro establishes baseline timings and coordinates.
+    </Note>
+  </Step>
+  
+  <Step title="Monitor the status log">
+    The GUI status log shows:
+    - Current action (e.g., "Gathering in Sunflower")
+    - Field progress and pack percentage
+    - Disconnection status
+    - Errors and warnings
+    
+    Watch this log during your first session to ensure everything works correctly.
+  </Step>
+</Steps>
+
+## What to expect
+
+During a typical macro session:
+
+### Gathering cycle
+
+1. **Travel to field** - Macro walks or uses cannon to reach the configured field
+2. **Execute pattern** - Follows the selected gathering pattern for the specified duration or until pack is full
+3. **Return to hive** - Walks back to hive when gathering conditions are met
+4. **Convert** - Converts pollen to honey when convert timer expires
+5. **Repeat** - Cycles to the next field and repeats
+
+### Status tracking
+
+The macro tracks:
+- Total and session runtime
+- Total and session gather time
+- Total and session convert time
+- Disconnects and reconnections
+- Quest completions (if enabled)
+- Planter collections (if enabled)
+- Boss and bug kills (if enabled)
+
+### Auto-reconnect
+
+If you disconnect:
+1. The macro detects the disconnection
+2. Automatically rejoins using your configured server link
+3. Navigates back to the hive
+4. Resumes gathering from where it left off
+
+<Info>
+  The macro is designed to run unattended. You can leave it running and it will handle disconnections, conversions, and field rotations automatically.
+</Info>
+
+## Advanced features (optional)
+
+Once you're comfortable with basic gathering, explore these features:
+
+### Quests
+
+Enable quest automation in the Quests tab:
+- Polar Bear, Honey Bee, Black Bear, Brown Bear quests
+- Bucko Bee and Riley Bee quests
+- Configurable gather interruption for quest completion
+
+### Planters
+
+Automate planter management in the Planters tab:
+- Choose which planters to use (Plastic, Candy, Clay, etc.)
+- Select preferred fields for each nectar type
+- Set harvest intervals and modes
+
+### Collectors
+
+Enable automatic collection in the Collect tab:
+- Wealth Clock
+- Dispensers (Honey, Treat, Royal Jelly, etc.)
+- Memory Match games
+- Honeystorm and special events
+
+### Bosses & bugs
+
+Configure boss fights and bug runs:
+- Tunnel Bear, King Beetle, Stump Snail
+- Coconut Crab, Commando Chick
+- Vicious Bee hunting
+- Spider, Mantis, Scorpion, Werewolf bug runs
+
+### Discord integration
+
+Send updates to Discord in the Status tab:
+- Configure webhook URL
+- Enable screenshot notifications
+- Set up remote commands
+- Configure ping alerts for critical events
+
+## Troubleshooting
+
+### Macro doesn't start
+
+- Verify Roblox is running and Bee Swarm Simulator is loaded
+- Check that display scale is 100% (96 DPI)
+- Ensure `AutoHotkey32.exe` exists in `submacros/` folder
+
+### Character not moving correctly
+
+- Adjust **Move Speed** setting to match your bee's speed
+- Try switching **Move Method** between Cannon and Walk
+- Ensure Roblox graphics settings haven't been manually modified
+
+### Macro can't find fields or objects
+
+- Confirm display scale is exactly 100%
+- Check that Roblox window is not minimized or covered
+- Verify that graphics settings are set correctly by the macro
+
+### Frequent disconnections
+
+- Use a private server link (more stable than public servers)
+- Add fallback server links in Settings
+- Check your internet connection stability
+
+## Get help
+
+<CardGroup cols={2}>
+  <Card title="Discord community" icon="discord" href="https://discord.gg/natromacro">
+    Join for guides, troubleshooting, and community support
+  </Card>
+  
+  <Card title="GitHub issues" icon="github" href="https://github.com/NatroTeam/NatroMacro/issues">
+    Report bugs or search for existing solutions
+  </Card>
+</CardGroup>
 
 ## Next steps
 
-Now that you have your docs running, explore these key features:
+Now that you've completed your first macro session:
 
-<CardGroup cols={2}>
+1. **Optimize your settings** - Fine-tune field choices, patterns, and timings for your playstyle
+2. **Enable advanced features** - Try quests, planters, and collectors
+3. **Join the Discord** - Download custom patterns, get optimization tips, and share your progress
+4. **Contribute** - Report bugs, suggest features, or create custom patterns for the community
 
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
-</CardGroup>
-
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>
+<Tip>
+  The macro is highly customizable. Experiment with different configurations to find what works best for your hive and goals!
+</Tip>

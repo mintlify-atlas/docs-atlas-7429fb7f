@@ -1,0 +1,218 @@
+---
+title: Installation
+description: Step-by-step guide to installing and setting up Natro Macro
+---
+
+## System requirements
+
+Before installing Natro Macro, ensure your system meets these requirements:
+
+### Operating system
+- **Windows** (64-bit recommended)
+- Administrator privileges may be required for certain installation locations
+
+### Display settings
+<Warning>
+  **Critical requirement:** Your display scale must be set to 100% (96 DPI).
+  
+  The macro uses image recognition which will **not work correctly** with other scaling values.
+</Warning>
+
+To verify and set your display scale:
+
+<Steps>
+  <Step title="Open display settings">
+    Right-click on your Desktop and select "Display Settings"
+  </Step>
+  
+  <Step title="Check scale value">
+    Under "Scale & Layout", verify that Scale is set to **100%**
+    
+    If it's set to a different value (125%, 150%, etc.), change it to 100%
+  </Step>
+  
+  <Step title="Restart Roblox">
+    Close and restart Roblox before starting the macro for the changes to take effect
+  </Step>
+</Steps>
+
+### Roblox requirements
+- Latest version of Roblox
+- Specific graphics settings (configured during setup)
+- Bee Swarm Simulator game access
+
+## Download Natro Macro
+
+<Warning>
+  **Download only from official sources!**
+  
+  The only official places to download Natro Macro are:
+  - [GitHub Releases](https://github.com/NatroTeam/NatroMacro/releases/latest)
+  - [Discord Server](https://discord.gg/natromacro)
+  
+  We do **not** have an official website. Beware of malicious copies from other sources.
+</Warning>
+
+<Steps>
+  <Step title="Navigate to latest release">
+    Go to the [latest release page](https://github.com/NatroTeam/NatroMacro/releases/latest) on GitHub
+  </Step>
+  
+  <Step title="Download the ZIP file">
+    Download `Natro_Macro_v#.#.#.zip` from the Assets section
+    
+    Replace `#.#.#` with the actual version number (e.g., `Natro_Macro_v1.1.1.zip`)
+  </Step>
+</Steps>
+
+## Extract the macro
+
+<Steps>
+  <Step title="Locate the downloaded ZIP">
+    Find `Natro_Macro_v#.#.#.zip` in your Downloads folder
+  </Step>
+  
+  <Step title="Extract to a safe location">
+    Right-click the ZIP file and select "Extract All..."
+    
+    Extract to a location where you have write permissions, such as:
+    - Desktop
+    - Documents
+    - Downloads
+    
+    <Note>
+      Avoid extracting to protected folders like `Program Files` or `C:\Windows` as these require administrator privileges and may cause issues.
+    </Note>
+  </Step>
+  
+  <Step title="Open the extracted folder">
+    Open the extracted `Natro_Macro_v#.#.#` folder and navigate to the inner folder with the same name
+    
+    You should see files including:
+    - `START.bat`
+    - `submacros/` folder
+    - `patterns/` folder
+    - `paths/` folder
+    - `lib/` folder
+  </Step>
+</Steps>
+
+## Handle antivirus warnings
+
+<Warning>
+  **Important: Antivirus false positives**
+  
+  Third-party antivirus software may flag AutoHotkey executables as suspicious or delete `AutoHotkey32.exe` from the `submacros` folder. This is a **false positive**.
+  
+  Both Natro Macro and AutoHotkey are safe and work fine with Microsoft Defender.
+</Warning>
+
+If your antivirus deletes `AutoHotkey32.exe`:
+
+<Steps>
+  <Step title="Disable third-party antivirus">
+    Temporarily disable your third-party antivirus software, **OR** add the Natro Macro folder as an exception/exclusion
+  </Step>
+  
+  <Step title="Re-extract the macro">
+    Delete the partially extracted folder and extract the ZIP file again
+  </Step>
+  
+  <Step title="Verify AutoHotkey32.exe exists">
+    Check that `AutoHotkey32.exe` exists in the `submacros` folder
+  </Step>
+</Steps>
+
+<Note>
+  Microsoft Defender (Windows built-in antivirus) does **not** flag Natro Macro or AutoHotkey. If you're using only Microsoft Defender, you should not encounter this issue.
+</Note>
+
+## Automatic extraction (optional)
+
+Natro Macro includes an automatic extraction feature in `START.bat`:
+
+- If you run `START.bat` before extracting, it will attempt to find the ZIP file in common locations:
+  - Downloads
+  - Downloads\Natro Macro
+  - Desktop
+  - Documents
+  - OneDrive\Downloads
+  - OneDrive\Desktop
+  - OneDrive\Documents
+
+- If found, it will automatically extract, delete the ZIP, and start the macro
+
+<Tip>
+  While automatic extraction is convenient, manual extraction gives you more control over the installation location.
+</Tip>
+
+## Verify installation
+
+After extraction, verify your installation:
+
+<Steps>
+  <Step title="Check folder structure">
+    Ensure the following folders exist:
+    ```
+    Natro_Macro_v#.#.#/
+    ├── START.bat
+    ├── submacros/
+    │   ├── natro_macro.ahk
+    │   ├── AutoHotkey32.exe
+    │   └── AutoHotkey64.exe
+    ├── patterns/
+    ├── paths/
+    ├── lib/
+    └── nm_image_assets/
+    ```
+  </Step>
+  
+  <Step title="Verify AutoHotkey executables">
+    Confirm that `AutoHotkey32.exe` exists in the `submacros` folder
+    
+    This is the most common file to be deleted by antivirus software
+  </Step>
+</Steps>
+
+## Next steps
+
+Now that Natro Macro is installed, you're ready to configure and run it!
+
+<Card title="Quick start guide" icon="play" href="/quickstart">
+  Learn how to configure and run your first macro session
+</Card>
+
+## Troubleshooting
+
+### Error: Could not find AutoHotkey32.exe
+
+This means your antivirus deleted the file. Follow the steps in [Handle antivirus warnings](#handle-antivirus-warnings).
+
+### Error: Could not create settings directory
+
+The macro needs write permissions in its folder:
+
+1. Move the macro to a different location (Desktop, Documents, or Downloads)
+2. If you must run it in the current location, right-click `START.bat` and select "Run as administrator"
+
+### Error: No .zip detected, but essential files are missing
+
+The extraction was incomplete or files were deleted:
+
+1. Delete the extracted folder
+2. Ensure your antivirus won't interfere (add exception)
+3. Re-extract the ZIP file
+
+## Get help
+
+If you encounter issues during installation:
+
+<CardGroup cols={2}>
+  <Card title="Discord support" icon="discord" href="https://discord.gg/natromacro">
+    Join the Discord server for troubleshooting help and guides
+  </Card>
+  
+  <Card title="Report bugs" icon="github" href="https://github.com/NatroTeam/NatroMacro/issues/new?labels=bug,needs+triage&template=bug.yml">
+    Submit a bug report on GitHub
+  </Card>
+</CardGroup>

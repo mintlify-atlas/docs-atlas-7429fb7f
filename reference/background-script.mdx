@@ -1,0 +1,427 @@
+---
+title: "Background Script Reference"
+description: "Technical reference for background.ahk - the background monitoring and detection system"
+---
+
+## Overview
+
+The `background.ahk` script runs as a separate process alongside the main macro, continuously monitoring the Roblox window for critical game events and states.
+
+**Location:** `submacros/background.ahk`
+
+**Purpose:**
+- Death detection
+- Guiding Star buff detection
+- Pop Star buff monitoring
+- Night/day cycle detection
+- Backpack percentage tracking
+- Emergency balloon handling
+- Daily reconnect scheduling
+
+## Initialization
+
+The background script is launched by the main macro during startup:
+
+```ahk
+if !WinExist("Heartbeat.ahk ahk_class AutoHotkey")
+    run '"' exe_path32 '" /script "' A_WorkingDir '\\submacros\\Heartbeat.ahk"'
+```
+
+### Requirements
+
+<ParamField path="A_Args" type="array">
+  The script must be launched with command-line arguments from the main macro. Manual execution will show an error.
+  
+  **Arguments:**
+  - `[1]` NightLastDetected (unused)
+  - `[2]` VBLastKilled (unused)
+  - `[3]` StingerCheck
+  - `[4]` StingerDailyBonusCheck (unused)
+  - `[5]` AnnounceGuidingStar
+  - `[6]` ReconnectInterval
+  - `[7]` ReconnectHour
+  - `[8]` ReconnectMin
+  - `[9]` EmergencyBalloonPingCheck
+  - `[10]` ConvertBalloon
+  - `[11]` NightMemoryMatchCheck
+  - `[12]` LastNightMemoryMatch (unused)
+</ParamField>
+
+## State Management
+
+### Global State Variables
+
+```ahk
+resetTime := nowUnix()
+LastState := nowUnix()
+LastConvertBalloon := nowUnix()
+state := 0
+MacroState := 2
+```
+
+<ParamField path="state" type="integer">
+  Current macro activity state:
+  - `0` - Idle/traveling
+  - `1` - Gathering in field
+  - Other values for specific activities
+</ParamField>
+
+<ParamField path="MacroState" type="integer">
+  Overall macro status:
+  - `0` - Stopped
+  - `1` - Paused
+  - `2` - Running
+</ParamField>
+
+<ParamField path="resetTime" type="integer">
+  Unix timestamp of last reset/respawn. Used to prevent false death detection immediately after respawn.
+</ParamField>
+
+## OnMessage Handlers
+
+The background script receives commands from the main macro:
+
+```ahk
+OnMessage(0x5552, nm_setGlobalInt, 255)  // Set integer variables
+OnMessage(0x5553, nm_setGlobalStr, 255)  // Set string variables  
+OnMessage(0x5554, nm_setGlobalNum, 255)  // Set numeric variables
+OnMessage(0x5555, nm_setState, 255)      // Update state
+OnMessage(0x5556, nm_sendHeartbeat)      // Heartbeat response
+```
+
+### Message Handlers
+
+<ResponseField name="nm_setGlobalNum" type="function">
+  Updates numeric variables from main script.
+  
+  ```ahk
+  nm_setGlobalNum(wParam, lParam, *)
+  ```
+  
+  **Parameters:**
+  - `wParam` - Variable index in array
+  - `lParam` - New value
+  
+  **Variables:**
+  - Index 1: `resetTime`
+  - Index 4: `StingerCheck`
+  - Index 6: `LastConvertBalloon`
+  - Index 7: `NightMemoryMatchCheck`
+</ResponseField>
+
+<ResponseField name="nm_setState" type="function">
+  Updates the current state from main script.
+  
+  ```ahk
+  nm_setState(wParam, lParam, *)
+  ```
+  
+  **Parameters:**
+  - `wParam` - New state value
+  - `lParam` - Last state value
+</ResponseField>
+
+## Main Loop
+
+The background script runs an infinite loop with 1-second intervals:
+
+```ahk
+loop {
+    hwnd := GetRobloxHWND()
+    GetRobloxClientPos(hwnd)
+    offsetY := GetYOffset(hwnd)
+    nm_deathCheck()
+    nm_guidCheck()
+    nm_popStarCheck()
+    nm_CheckNight()
+    nm_backpackPercentFilter()
+    nm_guidingStarDetect()
+    nm_dailyReconnect()
+    nm_EmergencyBalloon()
+    sleep 1000
+}
+```
+
+## Detection Functions
+
+### Death Detection
+
+<ResponseField name="nm_deathCheck" type="function">
+  Detects when the player dies by searching for the death screen image.
+  
+  ```ahk
+  nm_deathCheck()
+  ```
+  
+  **Behavior:**
+  - Checks bottom-right quadrant of screen
+  - Requires 20+ seconds since last reset
+  - Requires 10+ seconds since last death detection
+  - Uses `ImageSearch` with 50 variation tolerance
+  - Sends `PostMessage 0x5555, 1, 1` to main script
+  - Sends "You Died" via `WM_COPYDATA`
+  
+  **Image:** `nm_image_assets/died.png`
+</ResponseField>
+
+### Guiding Star Detection
+
+<ResponseField name="nm_guidCheck" type="function">
+  Detects when Guiding Star buff is active in fields.
+  
+  ```ahk
+  nm_guidCheck()
+  ```
+  
+  **Behavior:**
+  - Searches top portion of screen (offsetY+30 to offsetY+90)
+  - Only triggers when `state = 1` (gathering)
+  - Uses confirmation system (5 checks) before declaring buff ended
+  - Sends `PostMessage 0x5555, 6, 1` when detected
+  - Sends `PostMessage 0x5555, 6, 0` when ended
+  - Sends "Detected: Guiding Star Active" message
+  
+  **Image:** `nm_image_assets/boostguidingstar.png`
+  **Tolerance:** 50 variation
+</ResponseField>
+
+### Pop Star Detection
+
+<ResponseField name="nm_popStarCheck" type="function">
+  Monitors Pop Star amulet stacks and active state.
+  
+  ```ahk
+  nm_popStarCheck()
+  ```
+  
+  **Behavior:**
+  - Checks bottom 1/4 of screen
+  - Detects pop star counter to determine if buff is available
+  - Tracks two states: `HasPopStar` (has stacks) and `PopStarActive` (buff active)
+  - When counter visible: has stacks but not active
+  - When counter disappears during gathering: buff is active
+  - Sends state updates to main macro and StatMonitor
+  
+  **Messages:**
+  - `PostMessage 0x5555, 7, 1` - Has pop star stacks
+  - `PostMessage 0x5555, 8, 1` - Pop star active
+  - `PostMessage 0x5555, 8, 0` - Pop star ended
+  
+  **Image:** `nm_image_assets/popstar_counter.png`
+  **Tolerance:** 30 variation
+</ResponseField>
+
+### Night Detection
+
+<ResponseField name="nm_CheckNight" type="function">
+  Detects the night/day cycle for stinger spawns and night memory match.
+  
+  ```ahk
+  nm_CheckNight()
+  ```
+  
+  **Behavior:**
+  - Only runs if `StingerCheck` or `NightMemoryMatchCheck` enabled
+  - Scans bottom half of screen for lighting conditions
+  - Uses confidence system (6 consecutive detections)
+  - Distinguishes between day (0), night (1), and dusk (2)
+  - Maintains detection for 5 minutes after initial trigger
+  - Loads bitmaps from `nm_image_assets/night/` and `nm_image_assets/offset/`
+  
+  **States:**
+  - `0` - Day (nightConfidence &lt;= 1)
+  - `1` - Night (nightConfidence &gt;= 6 or within 5min of last detection)
+  - `2` - Dusk/transition (nightConfidence &gt; 1 but &lt; 6)
+  
+  **Messages:**
+  - `PostMessage 0x5552, 368, night` to main macro
+  - `PostMessage 0x5552, 367, night` to PlanterTimers
+  - Sends "Detected: Night" via WM_COPYDATA
+  
+  **Detection Method:**
+  ```ahk
+  CheckBitmap(time, variation)  // Searches for day/night bitmaps
+  ```
+</ResponseField>
+
+### Backpack Percentage Detection
+
+<ResponseField name="nm_backpackPercent" type="function">
+  Calculates backpack fill percentage using pixel color analysis.
+  
+  ```ahk
+  nm_backpackPercent()
+  ```
+  
+  **Behavior:**
+  - Samples pixel at `windowX+windowWidth//2+59+3, windowY+offsetY+6`
+  - Analyzes RGB color channels to determine fill level
+  - Returns percentage in 5% increments (0, 5, 10, ... 95, 100)
+  - Bar is 220 pixels wide = 11 pixels per 5%
+  
+  **Color Analysis:**
+  - Red channel increases as backpack fills
+  - Green/Blue channels decrease as backpack fills
+  - Uses bitwise AND with masks (0xFF0000, 0x00FFFF)
+  - Specific color thresholds for each 5% increment
+  
+  **Returns:** Integer percentage (0-100) or 0 if unable to determine
+</ResponseField>
+
+<ResponseField name="nm_backpackPercentFilter" type="function">
+  Applies rolling average filter to backpack percentage for stability.
+  
+  ```ahk
+  nm_backpackPercentFilter()
+  ```
+  
+  **Behavior:**
+  - Maintains 6-sample rolling window (6 seconds @ 1Hz)
+  - Calculates rounded average of samples
+  - Updates StatMonitor every 6 seconds
+  - Sends updates to main macro when value changes
+  
+  **Messages:**
+  - `PostMessage 0x5555, 4, BackpackPercent` (raw value)
+  - `PostMessage 0x5555, 5, BackpackPercentFiltered` (filtered value)
+  - `PostMessage 0x5557, BackpackPercentFiltered, timestamp` (to StatMonitor)
+</ResponseField>
+
+### Guiding Star Field Detection
+
+<ResponseField name="nm_guidingStarDetect" type="function">
+  Detects which field has a Guiding Star and announces it.
+  
+  ```ahk
+  nm_guidingStarDetect()
+  ```
+  
+  **Behavior:**
+  - Only runs if `AnnounceGuidingStar = 1`
+  - Rate limited to once per 10 seconds
+  - Searches center-to-bottom-right area of screen
+  - Checks two different guiding star icon variations
+  - Searches each of 17 fields for field name image
+  - Sends notification to main macro when found
+  
+  **Fields Checked:**
+  PineTree, Stump, Bamboo, BlueFlower, MountainTop, Cactus, Coconut, Pineapple, Spider, Pumpkin, Dandelion, Sunflower, Clover, Pepper, Rose, Strawberry, Mushroom
+  
+  **Images:**
+  - `nm_image_assets/guiding_star_icon1.png`
+  - `nm_image_assets/guiding_star_icon2.png`
+  - Field images in `nm_image_assets/fields/`
+</ResponseField>
+
+### Daily Reconnect
+
+<ResponseField name="nm_dailyReconnect" type="function">
+  Triggers scheduled reconnect at specified time.
+  
+  ```ahk
+  nm_dailyReconnect()
+  ```
+  
+  **Behavior:**
+  - Checks if current time matches `ReconnectHour:ReconnectMin`
+  - Only triggers once per minute window
+  - Sends `PostMessage 0x5555, 3, 1` to main macro
+  - Resets after 60 seconds to prevent multiple triggers
+</ResponseField>
+
+### Emergency Balloon
+
+<ResponseField name="nm_EmergencyBalloon" type="function">
+  Forces balloon conversion based on time since last convert.
+  
+  ```ahk
+  nm_EmergencyBalloon()
+  ```
+  
+  **Behavior:**
+  - Only runs if `EmergencyBalloonPingCheck = 1`
+  - Activates if `ConvertBalloon = "Every"` or `ConvertBalloon = "Never"`
+  - Checks if 2+ hours since last balloon conversion
+  - Sends emergency balloon notification
+  - Updates `LastConvertBalloon` timestamp
+</ResponseField>
+
+## Bitmap Loading
+
+The background script loads detection bitmaps during initialization:
+
+```ahk
+pToken := Gdip_Startup()
+bitmaps := Map()
+bitmaps.CaseSense := 0
+#Include "%A_ScriptDir%\\..\\nm_image_assets\\offset\\bitmaps.ahk"
+#Include "%A_ScriptDir%\\..\\nm_image_assets\\night\\bitmaps.ahk"
+```
+
+<ParamField path="bitmaps" type="Map">
+  Case-insensitive map storing GDI+ bitmap pointers for image detection.
+  
+  **Categories:**
+  - `offset` - UI offset detection bitmaps
+  - `night` - Night/day detection bitmaps
+  - Other detection images loaded as needed
+</ParamField>
+
+## Communication Protocol
+
+### Sending to Main Macro
+
+```ahk
+// PostMessage format
+PostMessage 0x5555, eventType, eventData, , "natro_macro ahk_class AutoHotkey"
+
+// WM_COPYDATA format  
+Send_WM_COPYDATA(message, "natro_macro ahk_class AutoHotkey")
+```
+
+### Event Types (0x5555)
+
+<ParamField path="eventType" type="integer">
+  **Values:**
+  - `1` - Death detected
+  - `3` - Daily reconnect time reached
+  - `4` - Backpack percent (raw)
+  - `5` - Backpack percent (filtered)
+  - `6` - Guiding Star state (lParam: 1=active, 0=inactive)
+  - `7` - Has Pop Star stacks
+  - `8` - Pop Star active state
+</ParamField>
+
+## Window Management
+
+The background script uses Roblox window detection functions from the library:
+
+```ahk
+hwnd := GetRobloxHWND()           // Get Roblox window handle
+GetRobloxClientPos(hwnd)          // Update window position globals
+offsetY := GetYOffset(hwnd)       // Calculate GUI offset
+```
+
+These functions handle both regular Roblox client and UWP version.
+
+## Coordinate System
+
+```ahk
+CoordMode "Pixel", "Screen"
+DetectHiddenWindows 1
+```
+
+All pixel and image searches use screen coordinates, and the script can detect hidden windows for inter-process communication.
+
+## Cleanup
+
+```ahk
+OnExit((*) => ProcessClose(DllCall("GetCurrentProcessId")))
+```
+
+The script forcefully terminates its own process on exit to ensure clean shutdown.
+
+## See Also
+
+- [Main Script Reference](/reference/main-script) - Main macro control and initialization
+- [Library Functions Reference](/reference/library-functions) - Roblox.ahk detection functions

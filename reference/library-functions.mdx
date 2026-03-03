@@ -1,0 +1,602 @@
+---
+title: "Library Functions Reference"
+description: "Technical reference for core library functions in the lib/ directory"
+---
+
+## Overview
+
+The `lib/` directory contains reusable utility functions and external libraries that power Natro Macro's automation capabilities.
+
+**Location:** `lib/`
+
+## Graphics and Image Processing
+
+### Gdip_All.ahk
+
+**Source:** [buliasz/AHKv2-Gdip](https://github.com/buliasz/AHKv2-Gdip)
+
+**Version:** 1.61 (modified for Natro Macro)
+
+Provides GDI+ wrapper functions for advanced graphics operations.
+
+<ResponseField name="Gdip_Startup" type="function">
+  Initializes GDI+ library.
+  
+  ```ahk
+  pToken := Gdip_Startup()
+  ```
+  
+  **Returns:** Token for GDI+ session (required for all other GDI+ functions)
+  
+  **Must call:** `Gdip_Shutdown(pToken)` on exit
+</ResponseField>
+
+<ResponseField name="Gdip_BitmapFromScreen" type="function">
+  Captures a screenshot region as a GDI+ bitmap.
+  
+  ```ahk
+  pBitmap := Gdip_BitmapFromScreen(Screen := 0, Raster := "")
+  ```
+  
+  **Parameters:**
+  - `Screen` - Region string: "x|y|w|h" or 0 for full screen
+  - `Raster` - Raster operation mode (optional)
+  
+  **Returns:** Pointer to GDI+ bitmap
+  
+  **Example:**
+  ```ahk
+  ; Capture window region
+  pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY "|" windowWidth "|" windowHeight)
+  ```
+</ResponseField>
+
+<ResponseField name="Gdip_CreateBitmap" type="function">
+  Creates a blank bitmap of specified dimensions.
+  
+  ```ahk
+  pBitmap := Gdip_CreateBitmap(width, height)
+  ```
+  
+  **Returns:** Pointer to GDI+ bitmap
+</ResponseField>
+
+<ResponseField name="Gdip_DisposeImage" type="function">
+  Frees memory used by a GDI+ bitmap.
+  
+  ```ahk
+  Gdip_DisposeImage(pBitmap)
+  ```
+  
+  **Important:** Always dispose bitmaps after use to prevent memory leaks
+</ResponseField>
+
+<ResponseField name="UpdateLayeredWindow" type="function">
+  Updates a layered window with GDI+ bitmap.
+  
+  ```ahk
+  UpdateLayeredWindow(hwnd, hdc, x := "", y := "", w := "", h := "", Alpha := 255)
+  ```
+  
+  **Parameters:**
+  - `hwnd` - Window handle
+  - `hdc` - Device context handle
+  - `x`, `y` - Position (optional, uses current if omitted)
+  - `w`, `h` - Dimensions (optional, uses current if omitted)
+  - `Alpha` - Transparency (0-255, default 255)
+</ResponseField>
+
+### Gdip_ImageSearch.ahk
+
+**Author:** MasterFocus (ported to AHKv2 by SP)
+
+Advanced image search function with variation tolerance and multiple search modes.
+
+<ResponseField name="Gdip_ImageSearch" type="function">
+  Searches for a needle bitmap within a haystack bitmap.
+  
+  ```ahk
+  result := Gdip_ImageSearch(pBitmapHaystack, pBitmapNeedle, &OutputList := "",
+      OuterX1 := 0, OuterY1 := 0, OuterX2 := 0, OuterY2 := 0,
+      Variation := 0, Trans := "", SearchDirection := 1, Instances := 1,
+      LineDelim := "`n", CoordDelim := ",")
+  ```
+  
+  **Parameters:**
+  <ParamField path="pBitmapHaystack" type="pointer" required>
+    GDI+ bitmap pointer to search within
+  </ParamField>
+  
+  <ParamField path="pBitmapNeedle" type="pointer" required>
+    GDI+ bitmap pointer to search for
+  </ParamField>
+  
+  <ParamField path="OutputList" type="byref string">
+    Variable to receive coordinates of matches (format: "x,y")
+  </ParamField>
+  
+  <ParamField path="OuterX1, OuterY1, OuterX2, OuterY2" type="integer" default="0">
+    Search region bounds (0 = full haystack)
+  </ParamField>
+  
+  <ParamField path="Variation" type="integer" default="0">
+    Color variation tolerance (0-255). Higher values allow more color difference.
+  </ParamField>
+  
+  <ParamField path="Trans" type="integer">
+    RGB transparent color (0x000000 to 0xFFFFFF). Pixels of this color in needle are ignored.
+  </ParamField>
+  
+  <ParamField path="SearchDirection" type="integer" default="1">
+    Search pattern direction:
+    - `1` - Top→left→right→bottom (default)
+    - `2` - Bottom→left→right→top
+    - `3` - Bottom→right→left→top
+    - `4` - Top→right→left→bottom
+    - `5` - Left→top→bottom→right
+    - `6` - Left→bottom→top→right
+    - `7` - Right→bottom→top→left
+    - `8` - Right→top→bottom→left
+  </ParamField>
+  
+  <ParamField path="Instances" type="integer" default="1">
+    Maximum matches to find (0 = find all, 1 = stop after first)
+  </ParamField>
+  
+  **Returns:**
+  - `>= 0` - Number of instances found
+  - `-1001` - Invalid bitmap pointer
+  - `-1002` - Invalid variation value
+  - `-1003` - Negative coordinates
+  - `-1004` - Unable to lock haystack bits
+  - `-1005` - Unable to lock needle bits
+  
+  **Example:**
+  ```ahk
+  ; Search for item in inventory
+  pBMScreen := Gdip_BitmapFromScreen(windowX "|" windowY "|306|400")
+  if (Gdip_ImageSearch(pBMScreen, bitmaps["item"], &pos, , , , , 10) = 1) {
+      x := SubStr(pos, 1, InStr(pos, ",") - 1)
+      y := SubStr(pos, InStr(pos, ",") + 1)
+      MsgBox "Found at " x "," y
+  }
+  Gdip_DisposeImage(pBMScreen)
+  ```
+</ResponseField>
+
+## Data Serialization
+
+### JSON.ahk
+
+**Author:** thqby, HotKeyIt
+
+**Version:** 1.0.7
+
+JSON serialization and deserialization with support for AutoHotkey v2 objects.
+
+<ResponseField name="JSON.parse" type="static method">
+  Converts JSON string to AutoHotkey object.
+  
+  ```ahk
+  obj := JSON.parse(text, keepbooltype := false, as_map := true)
+  ```
+  
+  **Parameters:**
+  - `text` - Valid JSON string
+  - `keepbooltype` - If true, converts to JSON.true/JSON.false/JSON.null; if false, uses 1/0/""
+  - `as_map` - If true, returns Map objects; if false, returns regular Objects
+  
+  **Returns:** Parsed object/Map/Array
+  
+  **Example:**
+  ```ahk
+  jsonStr := '{"name":"Natro","version":"1.1.1","active":true}'
+  data := JSON.parse(jsonStr)
+  MsgBox data["name"]  ; "Natro"
+  ```
+</ResponseField>
+
+<ResponseField name="JSON.stringify" type="static method">
+  Converts AutoHotkey object to JSON string.
+  
+  ```ahk
+  jsonStr := JSON.stringify(obj, indent := "", keepbooltype := false)
+  ```
+  
+  **Parameters:**
+  - `obj` - AutoHotkey value (Object/Map/Array/primitive)
+  - `indent` - Indentation string (e.g., "  " or "\t") for pretty-printing
+  - `keepbooltype` - If true, converts JSON.true/false/null to JSON literals
+  
+  **Returns:** JSON string
+  
+  **Example:**
+  ```ahk
+  data := Map("name", "Natro", "version", "1.1.1")
+  jsonStr := JSON.stringify(data, "  ")  ; Pretty-printed
+  ```
+</ResponseField>
+
+<ResponseField name="JSON.null, JSON.true, JSON.false" type="static properties">
+  Special ComValue objects representing JSON null, true, and false.
+  
+  ```ahk
+  obj := Map("enabled", JSON.true, "disabled", JSON.false, "value", JSON.null)
+  ```
+</ResponseField>
+
+## Roblox Automation
+
+### Roblox.ahk
+
+**Author:** SP
+
+Functions for automating and interacting with the Roblox window.
+
+<ResponseField name="GetRobloxHWND" type="function">
+  Gets the window handle for the Roblox client.
+  
+  ```ahk
+  hwnd := GetRobloxHWND()
+  ```
+  
+  **Returns:**
+  - Window handle (integer) if found
+  - `0` if Roblox window not found
+  
+  **Supports:**
+  - Standard Roblox client (RobloxPlayerBeta.exe)
+  - UWP version (ApplicationFrameHost.exe)
+</ResponseField>
+
+<ResponseField name="GetRobloxClientPos" type="function">
+  Updates global window position variables.
+  
+  ```ahk
+  success := GetRobloxClientPos(hwnd?)
+  ```
+  
+  **Parameters:**
+  - `hwnd` - Optional window handle (calls GetRobloxHWND if omitted)
+  
+  **Updates globals:**
+  - `windowX` - Client X position
+  - `windowY` - Client Y position
+  - `windowWidth` - Client width
+  - `windowHeight` - Client height
+  
+  **Returns:**
+  - `1` - Success
+  - `0` - Target error (window not found)
+</ResponseField>
+
+<ResponseField name="GetYOffset" type="function">
+  Calculates the Y-axis offset for GUI elements in Roblox.
+  
+  ```ahk
+  offset := GetYOffset(hwnd?, &fail?)
+  ```
+  
+  **Parameters:**
+  - `hwnd` - Optional window handle
+  - `fail` - ByRef variable set to 1 on failure, 0 on success
+  
+  **Returns:** Integer offset (defaults to 0 on failure)
+  
+  **How it works:**
+  - Searches for the pollen counter icon at top of screen
+  - Uses image detection to find exact GUI position
+  - Compensates for red vignette effects (20 attempts)
+  - Caches result per window handle
+  
+  **Images used:**
+  - `bitmaps["toppollen"]`
+  - `bitmaps["toppollenfill"]`
+</ResponseField>
+
+<ResponseField name="ActivateRoblox" type="function">
+  Activates the Roblox window.
+  
+  ```ahk
+  success := ActivateRoblox()
+  ```
+  
+  **Returns:**
+  - `1` - Success
+  - `0` - Target error
+</ResponseField>
+
+### Walk.ahk
+
+**Author:** SP
+
+Precision movement system with haste detection and compensation.
+
+<ResponseField name="Walk" type="function">
+  Walks a specified distance with automatic haste compensation.
+  
+  ```ahk
+  Walk(n, hasteCap := 0)
+  ```
+  
+  **Parameters:**
+  - `n` - Distance in tiles (1 tile = 4 studs)
+  - `hasteCap` - Haste cap threshold (0 = no cap)
+  
+  **Behavior:**
+  - Uses high-precision QueryPerformanceCounter for timing
+  - Continuously detects movement speed during walk
+  - Compensates for haste, haste+, bear morphs, oil, smoothie buffs
+  - Formula: `v = base * (1 + coconut*0.1) * (1 + bear*0.04) * hasty_guard * gifted_hasty * (1 + haste*0.1) * haste_plus * oil * smoothie`
+  
+  **Haste Cap:**
+  - If `hasteCap = 0`: Full compensation for all haste levels
+  - If `hasteCap > 0`: No compensation below cap, full compensation above
+  - Example: `hasteCap = 5` ignores haste 1-5, compensates for haste 6-10 as if always 5
+</ResponseField>
+
+<ResponseField name="DetectMovespeed" type="function">
+  Detects current movement speed from buff icons.
+  
+  ```ahk
+  speed := DetectMovespeed(&s, &f, hasteCap := 0)
+  ```
+  
+  **Parameters:**
+  - `s` - ByRef start timestamp
+  - `f` - ByRef finish timestamp
+  - `hasteCap` - Haste cap threshold
+  
+  **Returns:** Movement speed in studs per second
+  
+  **Detection Method:**
+  1. Captures screen bitmap of buff area (top 30px of window)
+  2. Searches for buff icons using Gdip_ImageSearch
+  3. Reads stack numbers from buff counter digits
+  4. Calculates speed using movespeed formula
+  
+  **Buffs Detected:**
+  - Haste (with stack detection 1-10x)
+  - Coconut Haste
+  - Melody (distinguished from haste)
+  - Haste+ (2x boost)
+  - Oil (1.2x boost)
+  - Super Smoothie (1.25x boost)
+  - Bear morphs (Brown, Black, Panda, Polar, Gummy, Science, Mother)
+  
+  **Global Dependencies:**
+  - `base_movespeed` - Base movement speed from settings
+  - `hasty_guard` - Boolean for Hasty Guard bonus (1.1x)
+  - `gifted_hasty` - Boolean for Gifted Hasty Bee bonus (1.15x)
+  - `buff_characters` - Map of digit bitmaps (0-9)
+  - `bitmaps` - Map of buff icon bitmaps
+  - `offsetY` - GUI offset from GetYOffset()
+</ResponseField>
+
+## Discord Integration
+
+### Discord.ahk
+
+**Author:** SP
+
+Class for sending messages, embeds, and files to Discord via webhooks and bot API.
+
+<ResponseField name="discord.SendEmbed" type="static method">
+  Sends an embed message to Discord.
+  
+  ```ahk
+  discord.SendEmbed(message, color := 3223350, content := "", 
+      pBitmap := 0, channel := "", replyID := 0)
+  ```
+  
+  **Parameters:**
+  - `message` - Embed description text
+  - `color` - Embed color (integer, default blue)
+  - `content` - Message content outside embed
+  - `pBitmap` - GDI+ bitmap pointer for image attachment
+  - `channel` - Channel ID (uses default if blank)
+  - `replyID` - Message ID to reply to
+  
+  **Example:**
+  ```ahk
+  ; Send blue notification
+  discord.SendEmbed("Macro started", 3223350)
+  
+  ; Send red error with screenshot
+  pBM := Gdip_BitmapFromScreen()
+  discord.SendEmbed("Error occurred", 16711731, , pBM)
+  Gdip_DisposeImage(pBM)
+  ```
+</ResponseField>
+
+<ResponseField name="discord.SendFile" type="static method">
+  Sends a file or folder to Discord.
+  
+  ```ahk
+  result := discord.SendFile(filepath, replyID := 0)
+  ```
+  
+  **Parameters:**
+  - `filepath` - Full path to file or folder
+  - `replyID` - Message ID to reply to
+  
+  **Returns:**
+  - `0` - Success
+  - `-1` - File too large (>10MB limit)
+  - `-2` - File not found
+  - `-3` - Folder zip failed
+  
+  **Behavior:**
+  - Automatically zips folders (Windows 10+ only)
+  - Detects MIME types for images
+  - Deletes temp files after upload
+</ResponseField>
+
+<ResponseField name="discord.SendImage" type="static method">
+  Sends a GDI+ bitmap as an image.
+  
+  ```ahk
+  discord.SendImage(pBitmap, imgname := "image.png", replyID := 0)
+  ```
+  
+  **Parameters:**
+  - `pBitmap` - GDI+ bitmap pointer
+  - `imgname` - Filename for attachment
+  - `replyID` - Message ID to reply to
+</ResponseField>
+
+## Utility Functions
+
+### DurationFromSeconds.ahk
+
+<ResponseField name="DurationFromSeconds" type="function">
+  Formats seconds into duration string using Windows API.
+  
+  ```ahk
+  str := DurationFromSeconds(secs, format := "hh:mm:ss", capacity := 64)
+  ```
+  
+  **Parameters:**
+  - `secs` - Duration in seconds
+  - `format` - Format string (h, m, s, hh, mm, ss)
+  - `capacity` - Buffer capacity
+  
+  **Returns:** Formatted string
+  
+  **Example:**
+  ```ahk
+  DurationFromSeconds(3661)           ; "01:01:01"
+  DurationFromSeconds(3661, "h'h' m'm' s's'")  ; "1h 1m 1s"
+  ```
+</ResponseField>
+
+<ResponseField name="hmsFromSeconds" type="function">
+  Formats seconds into human-readable duration.
+  
+  ```ahk
+  str := hmsFromSeconds(secs)
+  ```
+  
+  **Example:**
+  ```ahk
+  hmsFromSeconds(3661)   ; "1h 1m 1s"
+  hmsFromSeconds(90)     ; "1m 30s"
+  hmsFromSeconds(45)     ; "45s"
+  ```
+</ResponseField>
+
+### HashFile.ahk
+
+**Author:** Deo (modified by lexikos for v2)
+
+<ResponseField name="HashFile" type="function">
+  Calculates cryptographic hash of a file.
+  
+  ```ahk
+  hash := HashFile(filePath, hashType := 2)
+  ```
+  
+  **Parameters:**
+  - `filePath` - Full path to file
+  - `hashType` - Hash algorithm:
+    - `1` - MD2
+    - `2` - MD5 (default)
+    - `3` - SHA-1
+    - `4` - SHA-256
+    - `5` - SHA-384
+    - `6` - SHA-512
+  
+  **Returns:** Hex string hash (e.g., "a1b2c3d4...")
+  
+  **Example:**
+  ```ahk
+  ; Get SHA-512 hash of pattern file
+  hash := HashFile("patterns/sunflower.ahk", 6)
+  ```
+</ResponseField>
+
+### HyperSleep.ahk
+
+<ResponseField name="HyperSleep" type="function">
+  High-precision sleep using QueryPerformanceCounter.
+  
+  ```ahk
+  HyperSleep(ms)
+  ```
+  
+  **Parameters:**
+  - `ms` - Duration in milliseconds
+  
+  **Behavior:**
+  - Uses busy-wait for precise timing
+  - Calls `Sleep 1` with timeBeginPeriod for durations >30ms
+  - More accurate than standard Sleep for short durations
+  - Higher CPU usage than Sleep
+</ResponseField>
+
+### nm_InventorySearch.ahk
+
+<ResponseField name="nm_InventorySearch" type="function">
+  Searches for an item in the Roblox inventory.
+  
+  ```ahk
+  coords := nm_InventorySearch(item, direction := "down", prescroll := 0, 
+      prescrolldir := "", scrolltoend := 1, max := 70)
+  ```
+  
+  **Parameters:**
+  - `item` - Item name (bitmap key)
+  - `direction` - Scroll direction: "down" or "up"
+  - `prescroll` - Number of scrolls before switching direction
+  - `prescrolldir` - Direction for prescrolls (blank = same as direction)
+  - `scrolltoend` - If 1, scrolls to top/bottom after prescrolls
+  - `max` - Maximum scroll attempts
+  
+  **Returns:**
+  - Array `[x, y]` - Coordinates for dragging item
+  - `0` - Item not found or error
+  
+  **Example:**
+  ```ahk
+  ; Find micro-converter, scrolling down
+  if (coords := nm_InventorySearch("microconverter", "down")) {
+      Click coords[1], coords[2]
+  }
+  ```
+</ResponseField>
+
+### nm_OpenMenu.ahk
+
+<ResponseField name="nm_OpenMenu" type="function">
+  Opens/closes menu tabs in Roblox.
+  
+  ```ahk
+  nm_OpenMenu(tab := "", refresh := 0)
+  ```
+  
+  **Parameters:**
+  - `tab` - Menu tab to open:
+    - `"itemmenu"` - Inventory
+    - `"questlog"` - Quests
+    - `"beemenu"` - Bees
+    - `"badgelist"` - Badges
+    - `"settingsmenu"` - Settings
+    - `"shopmenu"` - Shop
+    - `""` - Close all menus
+  - `refresh` - If 1, closes and reopens the tab
+  
+  **Returns:**
+  - `1` - Success
+  - `0` - Roblox window not found
+  
+  **Example:**
+  ```ahk
+  nm_OpenMenu("itemmenu")   ; Open inventory
+  nm_OpenMenu()              ; Close all menus
+  ```
+</ResponseField>
+
+## See Also
+
+- [Main Script Reference](/reference/main-script) - Integration with main macro
+- [Background Script Reference](/reference/background-script) - Usage in background monitoring

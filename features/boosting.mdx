@@ -1,0 +1,524 @@
+---
+title: Field boost system
+description: Automate field boosters, dice rolling, glitter usage, and boost stacking for maximum pollen efficiency
+---
+
+Natro Macro includes comprehensive field boost automation, including free field boosters, dice rolling, glitter application, and Wind Shrine offerings.
+
+## Boost overview
+
+Field boosts multiply pollen collection for specific fields. The macro can automatically maintain and stack these boosts:
+
+<CardGroup cols={3}>
+  <Card title="Blue Booster" icon="droplet">
+    Boosts: Blue Flower (3x), Pine Tree, Bamboo, Stump
+  </Card>
+  <Card title="Red Booster" icon="fire">
+    Boosts: Mushroom (3x), Rose, Strawberry, Pepper
+  </Card>
+  <Card title="Mountain Booster" icon="mountain">
+    Boosts: Sunflower (3x), Dandelion (3x), Spider (2x), Clover (2x), Pineapple (2x), Pumpkin, Cactus
+  </Card>
+</CardGroup>
+
+## Field booster configuration
+
+### Manual field boosters
+
+```ahk
+FieldBoosterMins = 15                  // Use booster every X minutes
+BoostChaserCheck = 0                   // Chase field boosts to other fields
+
+// Select up to 3 boosters
+FieldBooster1 = "None"                 // Blue/Red/Mountain/None
+FieldBooster2 = "None"
+FieldBooster3 = "None"
+```
+
+### Field-specific booster toggles
+
+<Tabs>
+  <Tab title="Blue fields">
+    ```ahk
+    BlueFlowerBoosterCheck = 1
+    BambooBoosterCheck = 1  
+    PineTreeBoosterCheck = 1
+    StumpBoosterCheck = 1
+    ```
+  </Tab>
+  
+  <Tab title="Red fields">
+    ```ahk
+    MushroomBoosterCheck = 1
+    StrawberryBoosterCheck = 1
+    RoseBoosterCheck = 1
+    PepperBoosterCheck = 1
+    ```
+  </Tab>
+  
+  <Tab title="Mountain fields">
+    ```ahk
+    SunflowerBoosterCheck = 1
+    DandelionBoosterCheck = 1
+    SpiderBoosterCheck = 1
+    CloverBoosterCheck = 1
+    PineappleBoosterCheck = 1
+    PumpkinBoosterCheck = 1
+    CactusBoosterCheck = 1
+    CoconutBoosterCheck = 0
+    ```
+  </Tab>
+</Tabs>
+
+<Info>
+Enable boosters only for fields you actively gather in for optimal efficiency.
+</Info>
+
+## Automatic Field Boost (AFB)
+
+<Warning>
+Automatic Field Boost is an advanced feature that uses items from your inventory. Configure carefully!
+</Warning>
+
+### AFB configuration
+
+```ahk
+AutoFieldBoostActive = 0               // Enable AFB
+AutoFieldBoostRefresh = 12.5           // Re-boost every X minutes
+
+// Dice settings
+AFBDiceEnable = 0                      // Use dice
+AFBDiceHotbar = "None"                 // Hotbar slot (2-7)
+AFBDiceLimitEnable = 1                 // Limit dice usage
+AFBDiceLimit = 1                       // Max dice per boost
+
+// Glitter settings  
+AFBGlitterEnable = 0                   // Use glitter
+AFBGlitterHotbar = "None"              // Hotbar slot (2-7)
+AFBGlitterLimitEnable = 1              // Limit glitter usage
+AFBGlitterLimit = 1                    // Max glitter per boost
+
+// Field booster settings
+AFBFieldEnable = 0                     // Use free field boosters
+
+// Session limits
+AFBHoursLimitEnable = 0                // Limit by total hours
+AFBHoursLimit = .01                    // Max hours to boost
+```
+
+### How AFB works
+
+<Steps>
+  <Step title="Field boost detection">
+    The macro detects when you enter a gathering field and checks if a boost is active.
+  </Step>
+  
+  <Step title="Boost application">
+    If boost is missing or expired:
+    1. Uses free field booster (if `AFBFieldEnable = 1`)
+    2. Rolls dice (if `AFBDiceEnable = 1`)
+    3. Applies glitter (if `AFBGlitterEnable = 1`)
+  </Step>
+  
+  <Step title="Boost refresh">
+    When `AutoFieldBoostRefresh` time is reached, re-applies the boost sequence.
+  </Step>
+  
+  <Step title="Usage tracking">
+    Tracks dice and glitter usage to enforce limits:
+    ```ahk
+    AFBdiceUsed = 0                    // Dice used this boost
+    AFBglitterUsed = 0                 // Glitter used this boost
+    ```
+  </Step>
+</Steps>
+
+### AFB best practices
+
+<AccordionGroup>
+  <Accordion title="Hotbar slot assignment">
+    Place your items in numbered hotbar slots (2-7):
+    
+    ```ahk
+    AFBDiceHotbar = "5"                // Field Dice in slot 5
+    AFBGlitterHotbar = "6"             // Glitter in slot 6  
+    ```
+    
+    <Tip>
+    Slot 1 is reserved for the tool. Slots 2-7 are available for boost items.
+    </Tip>
+  </Accordion>
+  
+  <Accordion title="Refresh timing">
+    Set `AutoFieldBoostRefresh` based on your field booster duration:
+    
+    - Default field booster: 15 minutes
+    - Recommend refresh at: 12-13 minutes
+    - Allows overlap to prevent boost gaps
+    
+    ```ahk
+    AutoFieldBoostRefresh = 12.5       // Re-boost at 12.5 minutes
+    ```
+  </Accordion>
+  
+  <Accordion title="Item limits">
+    Use limits to conserve valuable items:
+    
+    ```ahk
+    // Conservative - 1 dice + 1 glitter per boost
+    AFBDiceLimit = 1
+    AFBGlitterLimit = 1
+    
+    // Aggressive - 3 dice + 2 glitter per boost  
+    AFBDiceLimit = 3
+    AFBGlitterLimit = 2
+    ```
+  </Accordion>
+  
+  <Accordion title="Session limits">
+    Prevent excessive item consumption:
+    
+    ```ahk
+    AFBHoursLimitEnable = 1
+    AFBHoursLimit = 8                  // Stop AFB after 8 hours
+    ```
+    
+    The macro will disable AFB when the limit is reached.
+  </Accordion>
+</AccordionGroup>
+
+## Dice types
+
+<Tabs>
+  <Tab title="Field Dice">
+    **Effect:** Random field boost
+    
+    Gives a boost to a random field. The macro will use field dice when entering a field that doesn't have an active boost.
+    
+    <Info>
+    Field Dice can boost any field, including Mountain Top and Coconut which don't have free boosters.
+    </Info>
+  </Tab>
+  
+  <Tab title="Smooth Dice">
+    **Effect:** Random field boost (higher tier)
+    
+    Similar to Field Dice but with potentially better boost values.
+  </Tab>
+  
+  <Tab title="Loaded Dice">
+    **Effect:** Guaranteed field boost
+    
+    Provides a guaranteed field boost to the current field.
+    
+    <Tip>
+    Use Loaded Dice for important gathering sessions or when you need a specific field boosted.
+    </Tip>
+  </Tab>
+</Tabs>
+
+## Glitter
+
+**Effect:** 2.5x pollen multiplier for 15 minutes
+
+```ahk
+LastGlitter = 1                        // Timestamp of last glitter use
+```
+
+Glitter is one of the most powerful boost items:
+
+- **Stacks multiplicatively** with field boosters
+- **Example:** Blue Flower with blue booster (3x) + glitter (2.5x) = 7.5x pollen
+- **Duration:** 15 minutes
+- **Cooldown:** Can be reapplied immediately
+
+<Warning>
+Glitter is consumed on use. Set `AFBGlitterLimit` carefully to avoid running out.
+</Warning>
+
+## Wind Shrine
+
+The Wind Shrine provides powerful field-specific buffs in exchange for item donations:
+
+### Shrine configuration
+
+```ahk
+ShrineCheck = 0                        // Enable Wind Shrine donations
+LastShrine = 1                         // Last donation timestamp
+ShrineRot = 1                          // Current shrine slot (1-2)
+
+// Shrine slot 1
+ShrineAmount1 = 0                      // Number of items to donate
+ShrineItem1 = "None"                   // Item to donate
+ShrineIndex1 = 1                       // Repeat count (or "Infinite")
+
+// Shrine slot 2  
+ShrineAmount2 = 0
+ShrineItem2 = "None"
+ShrineIndex2 = 1
+```
+
+### Available shrine items
+
+<Accordion title="Donatable items">
+<Tabs>
+  <Tab title="Extracts & Consumables">
+    - Red Extract
+    - Blue Extract
+    - Enzymes
+    - Oil
+    - Glue
+    - Tropical Drink
+    - Gumdrops
+    - Moon Charms
+    - Glitter
+    - Star Jelly
+    - Purple Potion
+  </Tab>
+  
+  <Tab title="Fruits & Seeds">
+    - Blueberry
+    - Pineapple
+    - Strawberry
+    - Sunflower Seed
+  </Tab>
+  
+  <Tab title="Waxes & Special">
+    - Soft Wax
+    - Hard Wax
+    - Swirled Wax
+    - Caustic Wax
+    - Cloud Vial
+    - Ant Pass
+  </Tab>
+  
+  <Tab title="Dice">
+    - Field Dice
+    - Smooth Dice
+    - Loaded Dice
+    - Turpentine
+  </Tab>
+</Tabs>
+</Accordion>
+
+### Shrine donation cycle
+
+<Steps>
+  <Step title="Configure items">
+    Set up to 2 shrine donation slots with items and amounts.
+  </Step>
+  
+  <Step title="Shrine rotation">
+    The macro donates to Slot 1, waits 1 hour, then Slot 2, waits 1 hour, then repeats.
+  </Step>
+  
+  <Step title="Buff collection">
+    After donation, the shrine provides buffs for 1 hour.
+  </Step>
+  
+  <Step title="Repeat or finish">
+    Based on `ShrineIndex`, either repeats or stops when count is reached.
+  </Step>
+</Steps>
+
+### Example shrine setup
+
+```ahk
+// Donate 5 glitter infinitely
+ShrineAmount1 = 5
+ShrineItem1 = "Glitter"
+ShrineIndex1 = "Infinite"
+
+// Donate 10 enzymes, repeat 3 times
+ShrineAmount2 = 10  
+ShrineItem2 = "Enzymes"
+ShrineIndex2 = 3
+```
+
+## Hotbar items
+
+The macro can automatically use items from hotbar slots 2-7:
+
+### Hotbar configuration
+
+```ahk
+// Hotbar slot usage conditions
+HotbarWhile2 = "Never"                 // When to use slot 2
+HotbarWhile3 = "Never"                 // When to use slot 3
+HotbarWhile4 = "Never"
+HotbarWhile5 = "Never"
+HotbarWhile6 = "Never"
+HotbarWhile7 = "Never"
+
+// Cooldown timers (seconds)
+HotbarTime2 = 900
+HotbarTime3 = 900
+HotbarTime4 = 900
+HotbarTime5 = 900
+HotbarTime6 = 900
+HotbarTime7 = 900
+
+// Max uses per session
+HotbarMax2 = 0                         // 0 = unlimited
+HotbarMax3 = 0
+HotbarMax4 = 0
+HotbarMax5 = 0
+HotbarMax6 = 0
+HotbarMax7 = 0
+```
+
+### Hotbar usage conditions
+
+<Accordion title="Available conditions">
+- **Never** - Don't use this slot
+- **Always** - Use on cooldown
+- **At Hive** - Use when at hive
+- **Gathering** - Use while gathering in fields
+- **Attacking** - Use while fighting mobs
+- **Microconverter** - Use microconverter ability
+- **Whirligig** - Use whirligig item
+- **Enzymes** - Use enzymes
+- **GatherStart** - Use at start of gathering
+- **Snowflake** - Use during snowflake events
+</Accordion>
+
+### Example hotbar setup
+
+<CodeGroup>
+```ahk Microconverter Auto-Use
+// Auto-use microconverter when gathering
+HotbarWhile5 = "Microconverter"
+HotbarTime5 = 60                       // 1 minute cooldown
+HotbarMax5 = 0                         // Unlimited uses
+LastMicroConverter = 1
+```
+
+```ahk Enzymes for Boss Fights
+// Use enzymes when attacking
+HotbarWhile6 = "Attacking"
+HotbarTime6 = 1800                     // 30 minute cooldown
+HotbarMax6 = 5                         // Max 5 uses per session
+LastEnzymes = 1
+```
+
+```ahk Whirligig at Hive
+// Use whirligig when at hive
+HotbarWhile4 = "At Hive"  
+HotbarTime4 = 3600                     // 1 hour cooldown
+HotbarMax4 = 0
+LastWhirligig = 1
+```
+</CodeGroup>
+
+## Boost stacking strategies
+
+### Maximum boost stack
+
+<Tip>
+For maximum pollen efficiency, stack these boosts:
+</Tip>
+
+1. **Field Booster** (3x for main field) - Free from dispenser
+2. **Glitter** (2.5x) - AFB or manual use
+3. **Field Dice** - Additional field boost if lucky
+4. **Wind Shrine Buffs** - 1-hour duration field bonus
+5. **Sticker Stacks** - Bonus from sticker printer
+
+**Example Blue Flower stack:**
+- Blue Field Booster: 3x
+- Glitter: 2.5x
+- Total: 7.5x base pollen
+- With additional buffs: 10-15x+ possible
+
+### Boost maintenance
+
+```ahk
+FieldBoostStacks = 0                   // Required boost stacks before gathering
+```
+
+Set this to require a minimum number of field boost stacks before gathering:
+
+- `0` = No requirement (gather without boosts)
+- `1` = Require at least 1 boost  
+- `3` = Require maximum boosts (3x fields only)
+
+## Sticker integration
+
+### Sticker Stack
+
+```ahk
+StickerStackCheck = 0                  // Enable sticker stack automation
+LastStickerStack = 1                   // Last use timestamp
+StickerStackItem = "Tickets"           // Item to stack
+StickerStackMode = 0                   // Stacking mode
+StickerStackTimer = 900                // Time between uses (seconds)
+StickerStackHive = 0                   // Stack at hive
+StickerStackCub = 0                    // Stack at Cub Buddy
+StickerStackVoucher = 0                // Stack with field dice voucher
+```
+
+Sticker stacks provide temporary field boost bonuses when combined with specific items.
+
+<Info>
+Sticker functionality requires specific in-game unlocks and inventory items.
+</Info>
+
+## Boost tracking
+
+### Internal tracking variables
+
+```ahk
+// Field booster timestamps
+LastBlueBoost = 1
+LastRedBoost = 1  
+LastMountainBoost = 1
+
+// Item usage timestamps
+LastGlitter = 1
+LastGuid = 1                           // Guiding star
+LastEnzymes = 1
+LastWhirligig = 1
+LastMicroConverter = 1
+
+// AFB state
+AutoFieldBoostActive = 0               // AFB enabled/disabled
+FieldLastBoosted = 1                   // Last boost timestamp
+FieldLastBoostedBy = "None"            // What boosted the field
+FieldNextBoostedBy = "None"            // Next planned boost
+```
+
+## Troubleshooting
+
+<Warning>
+Common boost issues and solutions:
+</Warning>
+
+**AFB not activating:**
+- Check `AutoFieldBoostActive = 1`
+- Verify hotbar slots are correctly assigned
+- Ensure items are in the correct hotbar slots
+- Check that field booster toggles are enabled
+
+**Dice/Glitter not being used:**
+- Verify `AFBDiceEnable` or `AFBGlitterEnable` is `1`
+- Check that `AFBDiceHotbar` and `AFBGlitterHotbar` are set
+- Ensure items are in inventory and equipped to hotbar
+- Check usage limits haven't been reached
+
+**Boosts not stacking:**
+- Field boosters from the same type don't stack (can't have 2 blue boosters)
+- Glitter and field boosters stack multiplicatively
+- Dice can add additional boosts if they land on the same field
+- Check buff icons in-game to verify active boosts
+
+**Wind Shrine not donating:**
+- Verify `ShrineCheck = 1`
+- Ensure items are in inventory
+- Check `ShrineAmount` is set correctly
+- Shrine has a 1-hour rotation between donations
+
+**Hotbar items not activating:**
+- Verify `HotbarWhile#` matches your intended usage
+- Check that `HotbarTime#` cooldown has passed
+- Ensure `HotbarMax#` hasn't been reached for session
+- Confirm items are equipped in correct hotbar slots

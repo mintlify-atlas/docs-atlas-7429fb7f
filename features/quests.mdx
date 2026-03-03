@@ -1,0 +1,371 @@
+---
+title: Quest automation
+description: Automatically detect, accept, and complete quests from all 6 quest givers in Bee Swarm Simulator
+---
+
+Natro Macro can automatically complete quests from all 6 quest givers in Bee Swarm Simulator. The macro detects quest objectives, gathers required pollen, kills needed mobs, and claims rewards.
+
+## Quest givers
+
+The macro supports quests from these NPCs:
+
+<CardGroup cols={2}>
+  <Card title="Polar Bear" icon="snowflake">
+    High-tier quests requiring specific mob kills and field gathering across multiple fields.
+  </Card>
+  <Card title="Black Bear" icon="circle">
+    Simple pollen collection quests focusing on specific fields or pollen colors.
+  </Card>
+  <Card title="Brown Bear" icon="cookie">
+    Mid-tier quests with mixed objectives including pollen and mob kills.
+  </Card>
+  <Card title="Bucko Bee" icon="droplet">
+    Blue-focused quests requiring blue pollen, blue field gathering, and blue booster usage.
+  </Card>
+  <Card title="Riley Bee" icon="fire">
+    Red-focused quests requiring red pollen, red field gathering, and red booster usage.
+  </Card>
+  <Card title="Honey Bee" icon="star">
+    Beginner quests teaching basic game mechanics.
+  </Card>
+</CardGroup>
+
+## Quest configuration
+
+### Basic settings
+
+```ahk
+QuestGatherMins = 5                      // Minutes to gather per quest field
+QuestGatherReturnBy = "Walk"             // Return method (Walk/Reset)
+QuestBoostCheck = 0                      // Use field boosters for quests
+```
+
+### Quest giver toggles
+
+<Tabs>
+  <Tab title="Polar Bear">
+    ```ahk
+    PolarQuestCheck = 0                    // Enable Polar Bear quests
+    PolarQuestGatherInterruptCheck = 1     // Interrupt gathering for quests
+    PolarQuestProgress = "Unknown"         // Current quest progress
+    ```
+    
+    <Info>
+    Polar Bear quests are the most complex, often requiring multiple mob kills and field visits.
+    </Info>
+  </Tab>
+  
+  <Tab title="Black Bear">
+    ```ahk
+    BlackQuestCheck = 0                    // Enable Black Bear quests
+    BlackQuestProgress = "Unknown"         // Current quest progress
+    LastBlackQuest = 1                     // Time since last quest
+    ```
+  </Tab>
+  
+  <Tab title="Brown Bear">
+    ```ahk
+    BrownQuestCheck = 0                    // Enable Brown Bear quests
+    BrownQuestProgress = "Unknown"         // Current quest progress
+    LastBrownQuest = 1                     // Time since last quest
+    ```
+  </Tab>
+  
+  <Tab title="Bucko Bee">
+    ```ahk
+    BuckoQuestCheck = 0                    // Enable Bucko Bee quests
+    BuckoQuestGatherInterruptCheck = 1     // Interrupt gathering for quests
+    BuckoQuestProgress = "Unknown"         // Current quest progress
+    ```
+    
+    <Tip>
+    Bucko quests often require blue field boosters. Enable `QuestBoostCheck` for optimal completion.
+    </Tip>
+  </Tab>
+  
+  <Tab title="Riley Bee">
+    ```ahk
+    RileyQuestCheck = 0                    // Enable Riley Bee quests
+    RileyQuestGatherInterruptCheck = 1     // Interrupt gathering for quests
+    RileyQuestProgress = "Unknown"         // Current quest progress
+    ```
+  </Tab>
+  
+  <Tab title="Honey Bee">
+    ```ahk
+    HoneyQuestCheck = 0                    // Enable Honey Bee quests
+    HoneyQuestProgress = "Unknown"         // Current quest progress
+    ```
+  </Tab>
+</Tabs>
+
+## Quest detection
+
+The macro automatically detects quest objectives using image recognition:
+
+### Quest types
+
+<AccordionGroup>
+  <Accordion title="Pollen collection quests">
+    Requires gathering specific amounts of pollen from fields:
+    
+    ```ahk
+    // Example: Black Bear "Fun In The Sunflowers"
+    [1, "Collect", "Sunflower"]
+    
+    // Example: Polar Bear "Exotic Salad"
+    [1, "Collect", "Cactus"]
+    [2, "Collect", "Rose"]
+    [3, "Collect", "Blue Flower"]
+    [4, "Collect", "Clover"]
+    ```
+    
+    The macro will visit each required field and gather until the objective is complete.
+  </Accordion>
+  
+  <Accordion title="Mob kill quests">
+    Requires killing specific enemies:
+    
+    ```ahk
+    // Example: Polar Bear "High Protein"
+    [4, "Kill", "Spider"]
+    [3, "Kill", "Scorpions"]
+    [2, "Kill", "Mantis"]
+    [1, "Collect", "Sunflower"]
+    ```
+    
+    The macro tracks kill counts and returns to spawn locations as needed.
+  </Accordion>
+  
+  <Accordion title="Ability/boost quests">
+    Requires using specific abilities or boosters:
+    
+    ```ahk
+    // Example: Bucko Bee "Booster"
+    [2, "Get", "BlueBoost"]
+    [1, "Collect", "Any"]
+    ```
+    
+    Enable `QuestBoostCheck` to automatically use required boosters.
+  </Accordion>
+  
+  <Accordion title="Mixed objective quests">
+    Combines multiple objective types:
+    
+    ```ahk
+    // Example: Polar Bear "Extreme Stir-Fry"
+    [6, "Kill", "Werewolf"]
+    [5, "Kill", "Scorpions"]
+    [4, "Kill", "Spider"]
+    [1, "Collect", "Cactus"]
+    [2, "Collect", "Bamboo"]
+    [3, "Collect", "Dandelion"]
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Quest completion flow
+
+### Standard quest cycle
+
+1. **Detection** - Macro checks if a quest is available
+2. **Acceptance** - Walks to quest giver and accepts quest
+3. **Objective completion**:
+   - Visits required fields for pollen collection
+   - Hunts required mobs at spawn locations
+   - Uses abilities/boosters as needed
+4. **Turn-in** - Returns to quest giver and claims reward
+5. **Repeat** - Checks for next quest
+
+### Gather interrupt system
+
+<Info>
+When `QuestGatherInterruptCheck` is enabled, the macro will pause normal gathering to complete quest objectives.
+</Info>
+
+```ahk
+PolarQuestGatherInterruptCheck = 1
+BuckoQuestGatherInterruptCheck = 1  
+RileyQuestGatherInterruptCheck = 1
+```
+
+**How it works:**
+- During normal field gathering, macro checks for quest fields
+- If current field matches a quest objective, continues gathering
+- Tracks quest progress and completes objectives efficiently
+- Returns to normal gathering rotation after quest turn-in
+
+## Quest data reference
+
+### Polar Bear quests
+
+<Accordion title="View all Polar Bear quests">
+<Tabs>
+  <Tab title="Combat-focused">
+    **High Protein**
+    - Kill 4 Spiders
+    - Kill 3 Scorpions  
+    - Kill 2 Mantis
+    - Collect Sunflower pollen
+    
+    **Extreme Stir-Fry**
+    - Kill 6 Werewolves
+    - Kill 5 Scorpions
+    - Kill 4 Spiders
+    - Collect Cactus pollen
+    - Collect Bamboo pollen
+    - Collect Dandelion pollen
+  </Tab>
+  
+  <Tab title="Gathering-focused">
+    **Prickly Pears**
+    - Collect Cactus pollen
+    
+    **Trail Mix**
+    - Collect Sunflower pollen
+    - Collect Pineapple pollen
+    
+    **Thick Smoothie**
+    - Collect Strawberry pollen
+    - Collect Pumpkin pollen
+  </Tab>
+  
+  <Tab title="Mixed objectives">
+    **Beetle Brew**
+    - Kill 3 Ladybugs
+    - Kill 4 Rhino Beetles
+    - Collect Pineapple pollen
+    - Collect Dandelion pollen
+    
+    **Pumpkin Pie**
+    - Kill 3 Mantis
+    - Collect Pumpkin pollen
+    - Collect Sunflower pollen
+  </Tab>
+</Tabs>
+</Accordion>
+
+### Black Bear quests
+
+<Accordion title="View all Black Bear quests">
+<Tabs>
+  <Tab title="Single field">
+    **Blue Flower Bliss** - Collect Blue Flower pollen
+    
+    **Delve Into Dandelions** - Collect Dandelion pollen
+    
+    **Fun In The Sunflowers** - Collect Sunflower pollen
+    
+    **Mission For Mushrooms** - Collect Mushroom pollen
+    
+    **Pepper Patrol** - Collect Pepper pollen
+  </Tab>
+  
+  <Tab title="Multi-field">
+    **Leisurely Lowlands**
+    - Collect Sunflower pollen
+    - Collect Dandelion pollen
+    - Collect Mushroom pollen
+    - Collect Blue Flower pollen
+    
+    **Triple Trek**
+    - Collect Mountain Top pollen
+    - Collect Pepper pollen
+    - Collect Coconut pollen
+  </Tab>
+  
+  <Tab title="Pollen color">
+    **Just White** - Collect white pollen
+    
+    **Just Red** - Collect red pollen
+    
+    **Just Blue** - Collect blue pollen
+    
+    **Any Pollen** - Collect any pollen
+    
+    **The Whole Lot**
+    - Collect red pollen
+    - Collect blue pollen
+    - Collect white pollen
+  </Tab>
+</Tabs>
+</Accordion>
+
+### Bucko/Riley Bee quests
+
+<CodeGroup>
+```text Bucko Bee (Blue)
+Abilities - Collect any pollen
+Bamboo - Collect Bamboo pollen
+Flowers - Collect Blue Flower pollen
+Pine Trees - Collect Pine Tree pollen
+Goo - Collect blue pollen
+Pollen - Collect blue pollen
+Booster - Get blue field booster, collect any pollen
+Skirmish - Kill Rhino Beetles, collect Blue Flower pollen
+Tango - Kill Mantis, collect blue pollen
+```
+
+```text Riley Bee (Red)
+Abilities - Collect any pollen
+Mushrooms - Collect Mushroom pollen
+Strawberries - Collect Strawberry pollen  
+Roses - Collect Rose pollen
+Goo - Collect red pollen
+Pollen - Collect red pollen
+Booster - Get red field booster, collect any pollen
+Skirmish - Kill Ladybugs, collect Mushroom pollen
+Tango - Kill Scorpions, collect red pollen
+```
+</CodeGroup>
+
+## Quest settings
+
+### Optimal configuration
+
+<Tip>
+For maximum quest efficiency, use these recommended settings:
+</Tip>
+
+```ahk
+QuestGatherMins = 5                // Enough time to complete most objectives
+QuestGatherReturnBy = "Walk"       // Safer than reset for quest fields
+QuestBoostCheck = 1                // Use boosters for booster quests
+
+// Enable interrupt for quest-focused NPCs
+PolarQuestGatherInterruptCheck = 1
+BuckoQuestGatherInterruptCheck = 1
+RileyQuestGatherInterruptCheck = 1
+```
+
+### Priority in action list
+
+<Info>
+Quest completion is handled by the "QuestRotate" action in the priority list. Adjust its position relative to "Gather" to control when quests are completed.
+</Info>
+
+## Troubleshooting
+
+<Warning>
+Common quest issues and solutions:
+</Warning>
+
+**Macro doesn't accept quests:**
+- Ensure quest giver toggle is enabled (`PolarQuestCheck = 1`)
+- Check that you don't already have an active quest
+- Verify the macro can detect the quest giver NPC
+
+**Quest progress not tracking:**
+- Quest objectives are image-recognized from the quest UI
+- Ensure Roblox graphics quality is set to lowest
+- Check that your display scale is 100%
+
+**Gets stuck on mob kill objectives:**
+- Some mobs require specific conditions (time of day, buffs)
+- Werewolf only spawns at night
+- Enable bugrun features if struggling with kills
+
+**Skips available quests:**
+- Check `LastBlackQuest`/`LastBrownQuest` timers
+- These prevent spam-accepting the same quest
+- Timers reset when quest is completed

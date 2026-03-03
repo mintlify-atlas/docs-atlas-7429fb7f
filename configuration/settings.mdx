@@ -1,0 +1,213 @@
+---
+title: Settings & Configuration
+description: Configure Natro Macro settings, hive configuration, reconnect options, and preferences
+---
+
+## Overview
+
+Natro Macro stores all configuration settings in `settings/nm_config.ini`. The macro automatically creates this file with default values on first run and updates it whenever you change settings through the GUI.
+
+## Configuration File Structure
+
+The settings file is organized into sections:
+
+- **Settings** - Main macro configuration
+- **Status** - Runtime statistics and Discord integration  
+- **Gather** - Field gathering configuration
+- **Collect** - Item collection and boss timers
+- **Shrine** - Wind shrine settings
+- **Blender** - Blender configuration
+- **Boost** - Field boosters and hotbar items
+- **Quests** - Quest automation settings
+- **Planters** - Planter automation settings
+
+## Hive Configuration
+
+<ParamField path="HiveSlot" type="number" default="6">
+  Your hive slot number (1-6). The macro uses this to navigate back to your hive.
+</ParamField>
+
+<ParamField path="HiveBees" type="number" default="50">
+  Total number of bees in your hive. Used for gather time calculations.
+</ParamField>
+
+<ParamField path="MoveSpeedNum" type="number" default="28">
+  Your character's movement speed. Adjust this to match your in-game speed for accurate pathing.
+</ParamField>
+
+<ParamField path="MoveMethod" type="string" default="Cannon">
+  Method to travel to fields. Options: `Cannon`, `Walk`
+</ParamField>
+
+## Character Settings
+
+<ParamField path="SprinklerType" type="string" default="Supreme">
+  Your equipped sprinkler type. Options: `Basic`, `Silver`, `Golden`, `Diamond`, `Supreme`
+</ParamField>
+
+<ParamField path="ConvertBalloon" type="string" default="Gather">
+  When to convert honey using balloon. Options: `Never`, `Every`, `Gather`, `Always`
+</ParamField>
+
+<ParamField path="ConvertMins" type="number" default="30">
+  Minutes between forced convert (return to hive to convert honey).
+</ParamField>
+
+<ParamField path="DisableToolUse" type="boolean" default="0">
+  Set to 1 to disable automatic tool usage during gathering.
+</ParamField>
+
+## Reconnect Configuration
+
+Natro Macro can automatically reconnect to Bee Swarm Simulator if you get disconnected.
+
+<ParamField path="PrivServer" type="string" default="">
+  Your private server link. Format: `https://www.roblox.com/games/1537690962?privateServerLinkCode=...`
+</ParamField>
+
+<ParamField path="FallbackServer1" type="string" default="">
+  First fallback private server link if main server is full or unavailable.
+</ParamField>
+
+<ParamField path="FallbackServer2" type="string" default="">
+  Second fallback private server link.
+</ParamField>
+
+<ParamField path="FallbackServer3" type="string" default="">
+  Third fallback private server link.
+</ParamField>
+
+<ParamField path="ReconnectMethod" type="string" default="Deeplink">
+  Method to reconnect to Roblox. Options: `Deeplink`, `Browser`
+  
+  - **Deeplink**: Faster, uses roblox:// protocol
+  - **Browser**: Opens your default browser to join
+</ParamField>
+
+<ParamField path="PublicFallback" type="boolean" default="1">
+  Allow joining public servers if all private servers fail.
+</ParamField>
+
+<ParamField path="ReconnectInterval" type="string" default="">
+  Automatically reconnect every X hours (e.g., "6" for 6 hours). Leave empty to disable.
+</ParamField>
+
+<ParamField path="ReconnectHour" type="string" default="">
+  Reconnect at specific hour (0-23). Leave empty to disable.
+</ParamField>
+
+<ParamField path="ReconnectMin" type="string" default="">
+  Reconnect at specific minute (0-59). Use with ReconnectHour.
+</ParamField>
+
+## GUI Settings
+
+<ParamField path="GuiTheme" type="string" default="MacLion3">
+  Visual theme for the macro GUI.
+</ParamField>
+
+<ParamField path="AlwaysOnTop" type="boolean" default="0">
+  Keep the macro window always on top of other windows.
+</ParamField>
+
+<ParamField path="GuiTransparency" type="number" default="0">
+  GUI transparency level (0-255). 0 is opaque, 255 is transparent.
+</ParamField>
+
+<ParamField path="ShowOnPause" type="boolean" default="0">
+  Automatically show the GUI window when macro is paused.
+</ParamField>
+
+## Input Settings
+
+<ParamField path="ClickCount" type="number" default="1000">
+  Number of clicks for auto-clicker.
+</ParamField>
+
+<ParamField path="ClickDelay" type="number" default="10">
+  Delay between clicks in milliseconds.
+</ParamField>
+
+<ParamField path="ClickMode" type="number" default="1">
+  Click mode: 1 = Left click, 2 = Right click
+</ParamField>
+
+<ParamField path="KeyDelay" type="number" default="20">
+  Delay between key presses in milliseconds. Adjust if movement is inconsistent.
+</ParamField>
+
+## Hotkeys
+
+See the [Hotkeys](/configuration/hotkeys) page for detailed hotkey configuration.
+
+<ParamField path="StartHotkey" type="string" default="F1">
+  Hotkey to start the macro.
+</ParamField>
+
+<ParamField path="PauseHotkey" type="string" default="F2">
+  Hotkey to pause/resume the macro.
+</ParamField>
+
+<ParamField path="StopHotkey" type="string" default="F3">
+  Hotkey to stop the macro.
+</ParamField>
+
+<ParamField path="AutoClickerHotkey" type="string" default="F4">
+  Hotkey to activate the auto-clicker.
+</ParamField>
+
+<ParamField path="TimersHotkey" type="string" default="F5">
+  Hotkey to show/hide planter timers.
+</ParamField>
+
+<ParamField path="DebugHotkey" type="string" default="F6">
+  Hotkey to copy debug log to clipboard.
+</ParamField>
+
+## Update Settings
+
+<ParamField path="ReleaseChannel" type="string" default="Stable">
+  Update channel to use. Options: `Stable`, `Beta`
+</ParamField>
+
+<ParamField path="IgnoreUpdateVersion" type="string" default="">
+  Ignore updates for a specific version (e.g., "1.1.0").
+</ParamField>
+
+## Reset Settings
+
+To reset all settings to defaults:
+
+1. Stop the macro
+2. Delete `settings/nm_config.ini`
+3. Restart the macro
+
+The macro will recreate the file with default values.
+
+<Warning>
+Resetting settings will erase all your configuration including private server links, field settings, and quest progress. Consider backing up the file first.
+</Warning>
+
+## Manual Configuration
+
+You can manually edit `settings/nm_config.ini` while the macro is stopped. The file uses standard INI format:
+
+<CodeGroup>
+```ini Example
+[Settings]
+HiveSlot=6
+HiveBees=50
+MoveSpeedNum=28
+PrivServer=https://www.roblox.com/games/1537690962?privateServerLinkCode=...
+ReconnectMethod=Deeplink
+
+[Gather]
+FieldName1=Sunflower
+FieldPattern1=Squares
+FieldPatternSize1=M
+```
+</CodeGroup>
+
+<Warning>
+Always stop the macro before manually editing configuration files. Changes made while the macro is running will be overwritten.
+</Warning>

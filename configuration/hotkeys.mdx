@@ -1,0 +1,373 @@
+---
+title: Keyboard Controls & Hotkeys
+description: Configure macro hotkeys and understand keyboard controls for Natro Macro
+---
+
+## Default Hotkeys
+
+Natro Macro uses these default hotkeys to control macro execution:
+
+<CardGroup cols={2}>
+  <Card title="Start Macro" icon="play">
+    **F1** - Start or resume macro execution
+  </Card>
+  <Card title="Pause Macro" icon="pause">
+    **F2** - Pause the macro (press again to resume)
+  </Card>
+  <Card title="Stop Macro" icon="stop">
+    **F3** - Stop the macro completely
+  </Card>
+  <Card title="Auto-Clicker" icon="mouse-pointer">
+    **F4** - Activate the auto-clicker
+  </Card>
+  <Card title="Planter Timers" icon="clock">
+    **F5** - Show/hide planter timer window
+  </Card>
+  <Card title="Debug Log" icon="bug">
+    **F6** - Copy debug log to clipboard
+  </Card>
+</CardGroup>
+
+## Changing Hotkeys
+
+<Steps>
+  <Step title="Open Settings">
+    Click the **Settings** tab in the macro GUI.
+  </Step>
+  
+  <Step title="Click Hotkey Settings">
+    Find and click the **Hotkey Settings** button.
+  </Step>
+  
+  <Step title="Configure Hotkeys">
+    Click in the hotkey field you want to change, then press your desired key or key combination.
+    
+    Supported formats:
+    - Single keys: `F1`, `A`, `1`, etc.
+    - With modifiers: `^A` (Ctrl+A), `!B` (Alt+B), `+C` (Shift+C)
+    - Function keys: `F1` through `F24`
+    - Special keys: `Space`, `Enter`, `Tab`, etc.
+  </Step>
+  
+  <Step title="Save Changes">
+    Click **Save** to apply your new hotkey configuration.
+  </Step>
+  
+  <Step title="Reset to Defaults">
+    Click **Reset to Defaults** to restore original hotkey settings.
+  </Step>
+</Steps>
+
+<Warning>
+Hotkeys must be unique - you cannot assign the same hotkey to multiple functions. The macro will warn you if you try to use a duplicate hotkey.
+</Warning>
+
+## Movement Keys
+
+These keys control character movement and are used by patterns and paths. By default, they map to standard WASD controls.
+
+### Default Movement Mapping
+
+<ParamField path="FwdKey" type="scancode" default="sc011">
+  **Forward** - Default: `W`
+  
+  Moves character forward. Used in patterns as `TCFBKey`.
+</ParamField>
+
+<ParamField path="LeftKey" type="scancode" default="sc01e">
+  **Left** - Default: `A`
+  
+  Moves character left. Used in patterns as `TCLRKey`.
+</ParamField>
+
+<ParamField path="BackKey" type="scancode" default="sc01f">
+  **Backward** - Default: `S`
+  
+  Moves character backward. Used in patterns as `AFCFBKey`.
+</ParamField>
+
+<ParamField path="RightKey" type="scancode" default="sc020">
+  **Right** - Default: `D`
+  
+  Moves character right. Used in patterns as `AFCLRKey`.
+</ParamField>
+
+### Camera Controls
+
+<ParamField path="RotLeft" type="scancode" default="sc033">
+  **Rotate Left** - Default: `,` (comma)
+  
+  Rotates camera counterclockwise.
+</ParamField>
+
+<ParamField path="RotRight" type="scancode" default="sc034">
+  **Rotate Right** - Default: `.` (period)
+  
+  Rotates camera clockwise.
+</ParamField>
+
+<ParamField path="RotUp" type="scancode" default="sc149">
+  **Rotate Up** - Default: `PgUp`
+  
+  Rotates camera upward.
+</ParamField>
+
+<ParamField path="RotDown" type="scancode" default="sc151">
+  **Rotate Down** - Default: `PgDn`
+  
+  Rotates camera downward.
+</ParamField>
+
+<ParamField path="ZoomIn" type="scancode" default="sc017">
+  **Zoom In** - Default: `I`
+  
+  Zooms camera closer to character.
+</ParamField>
+
+<ParamField path="ZoomOut" type="scancode" default="sc018">
+  **Zoom Out** - Default: `O`
+  
+  Zooms camera away from character.
+</ParamField>
+
+### Action Keys
+
+<ParamField path="SC_E" type="scancode" default="sc012">
+  **Interact** - Default: `E`
+  
+  Interact with objects, collect items, open dialogs.
+</ParamField>
+
+<ParamField path="SC_R" type="scancode" default="sc013">
+  **Reset Character** - Default: `R`
+  
+  Resets character position (Roblox default).
+</ParamField>
+
+<ParamField path="SC_L" type="scancode" default="sc026">
+  **Unknown** - Default: `L`
+</ParamField>
+
+<ParamField path="SC_Esc" type="scancode" default="sc001">
+  **Escape** - Default: `Esc`
+  
+  Opens Roblox menu.
+</ParamField>
+
+<ParamField path="SC_Enter" type="scancode" default="sc01c">
+  **Enter** - Default: `Enter`
+  
+  Confirms selections, opens chat.
+</ParamField>
+
+<ParamField path="SC_LShift" type="scancode" default="sc02a">
+  **Left Shift** - Default: `LShift`
+  
+  Sprint or shift lock.
+</ParamField>
+
+<ParamField path="SC_Space" type="scancode" default="sc039">
+  **Jump** - Default: `Space`
+  
+  Makes character jump.
+</ParamField>
+
+<ParamField path="SC_1" type="scancode" default="sc002">
+  **Hotbar 1** - Default: `1`
+  
+  Activates first hotbar slot.
+</ParamField>
+
+<ParamField path="SC_Slash" type="scancode" default="sc035">
+  **Chat** - Default: `/`
+  
+  Opens chat window.
+</ParamField>
+
+## Scan Codes vs Virtual Keys
+
+Natro Macro uses **scan codes** rather than virtual key codes for more reliable input:
+
+- Scan codes are hardware-based and work regardless of keyboard layout
+- Virtual keys can change based on language/region settings
+- Scan codes format: `sc###` where ### is the hex code
+
+### Common Scan Codes
+
+<CodeGroup>
+```ahk Movement Keys
+FwdKey   := "sc011"  ; W
+LeftKey  := "sc01e"  ; A  
+BackKey  := "sc01f"  ; S
+RightKey := "sc020"  ; D
+```
+
+```ahk Camera Keys
+RotLeft  := "sc033"  ; , (comma)
+RotRight := "sc034"  ; . (period)
+RotUp    := "sc149"  ; Page Up
+RotDown  := "sc151"  ; Page Down
+ZoomIn   := "sc017"  ; I
+ZoomOut  := "sc018"  ; O
+```
+
+```ahk Action Keys  
+SC_E      := "sc012"  ; E
+SC_R      := "sc013"  ; R
+SC_L      := "sc026"  ; L
+SC_Esc    := "sc001"  ; Escape
+SC_Enter  := "sc01c"  ; Enter
+SC_LShift := "sc02a"  ; Left Shift
+SC_Space  := "sc039"  ; Space
+SC_1      := "sc002"  ; 1
+SC_Slash  := "sc035"  ; /
+```
+</CodeGroup>
+
+## Customizing Movement Keys
+
+<Warning>
+Changing movement keys requires editing the source code and is NOT recommended unless you have AutoHotkey experience. Incorrect changes can break pattern and path functionality.
+</Warning>
+
+Movement keys are defined in `natro_macro.ahk:151-169`:
+
+<CodeGroup>
+```ahk Default Key Mapping
+; assign scan codes to key variables
+TCFBKey:=FwdKey:="sc011" ; w
+TCLRKey:=LeftKey:="sc01e" ; a
+AFCFBKey:=BackKey:="sc01f" ; s
+AFCLRKey:=RightKey:="sc020" ; d
+RotLeft:="sc033" ; ,
+RotRight:="sc034" ; .
+RotUp:="sc149" ; PgUp
+RotDown:="sc151" ; PgDn
+ZoomIn:="sc017" ; i
+ZoomOut:="sc018" ; o
+SC_E:="sc012" ; e
+SC_R:="sc013" ; r
+SC_L:="sc026" ; l
+SC_Esc:="sc001" ; Esc
+SC_Enter:="sc01c" ; Enter
+SC_LShift:="sc02a" ; LShift
+SC_Space:="sc039" ; Space
+SC_1:="sc002" ; 1
+SC_Slash := "sc035" ; /
+```
+</CodeGroup>
+
+If you change these values:
+
+1. Ensure your in-game Roblox controls match
+2. Test thoroughly with patterns and paths  
+3. Back up the original file first
+4. Be prepared to restore defaults if issues occur
+
+## Hotbar Slots
+
+The macro can use hotbar slots 2-7 for items like field dice, glitter, micro-converters, etc.
+
+Hotbar keys are dynamically assigned based on slot number:
+
+<CodeGroup>
+```ahk Hotbar Key Assignment
+; Example from natro_macro.ahk:22596-22626
+MicroConverterKey := "sc00" slot+1
+WhirligigKey := "sc00" slot+1  
+EnzymesKey := "sc00" slot+1
+GlitterKey := "sc00" slot+1
+```
+</CodeGroup>
+
+This automatically maps to keys 2-7 based on which hotbar slot you configure.
+
+## Hotkey Configuration Storage
+
+Hotkeys are stored in `settings/nm_config.ini` under the `[Settings]` section:
+
+<CodeGroup>
+```ini Hotkey Settings
+[Settings]
+StartHotkey=F1
+PauseHotkey=F2
+StopHotkey=F3
+AutoClickerHotkey=F4
+TimersHotkey=F5
+DebugHotkey=F6
+```
+</CodeGroup>
+
+## Hotkey Modifiers
+
+You can use modifier keys in hotkey combinations:
+
+<ParamField path="^" type="modifier">
+  **Control (Ctrl)** - Example: `^F1` = Ctrl+F1
+</ParamField>
+
+<ParamField path="!" type="modifier">
+  **Alt** - Example: `!F1` = Alt+F1
+</ParamField>
+
+<ParamField path="+" type="modifier">
+  **Shift** - Example: `+F1` = Shift+F1
+</ParamField>
+
+<ParamField path="#" type="modifier">
+  **Windows Key** - Example: `#F1` = Win+F1
+</ParamField>
+
+### Modifier Examples
+
+- `^!F1` = Ctrl+Alt+F1
+- `+^A` = Shift+Ctrl+A
+- `#Space` = Windows+Space
+
+## Troubleshooting
+
+**Hotkeys not working**
+- Ensure no other program is using the same hotkey
+- Check if Roblox window has focus
+- Verify hotkeys are enabled in Settings tab
+- Try running macro as administrator
+- Reset hotkeys to defaults
+
+**Movement keys not responding**
+- Verify Roblox controls match macro key mapping  
+- Check if another program is blocking input
+- Ensure macro has permission to send keys to Roblox
+- Test keys manually in Roblox first
+
+**Hotkey conflicts**
+- The macro will warn you if hotkeys overlap
+- Choose different keys for each function
+- Avoid keys used by Windows (e.g., Win+L locks PC)
+- Don't use keys needed for Roblox gameplay
+
+**Auto-clicker activating unexpectedly**
+- Check if F4 (default) is being pressed accidentally
+- Change AutoClickerHotkey to a less common key
+- Ensure the auto-clicker GUI is closed when not in use
+
+## Best Practices
+
+<Card title="Choose Accessible Keys" icon="keyboard">
+  Use function keys (F1-F12) or numpad keys that don't interfere with normal gameplay.
+</Card>
+
+<Card title="Avoid Game Conflicts" icon="gamepad">
+  Don't use keys that Roblox or Bee Swarm Simulator uses for important functions.
+</Card>
+
+<Card title="Document Custom Keys" icon="file-text">
+  If you change hotkeys, note them down so you remember your configuration.
+</Card>
+
+<Card title="Test Before Using" icon="flask">
+  After changing hotkeys, test each one to ensure it works as expected.
+</Card>
+
+<Card title="Keep Defaults Handy" icon="rotate-left">
+  Know how to reset to defaults in case custom hotkeys cause issues.
+</Card>

@@ -1,0 +1,337 @@
+---
+title: Navigation Paths
+description: Understand navigation paths, path types, and how to customize paths for your hive location
+---
+
+## Overview
+
+Paths control how your character navigates between locations in Bee Swarm Simulator. Natro Macro includes optimized paths for all fields, planters, boosters, and collection points.
+
+## Path Types
+
+Paths are organized into 5 categories based on their purpose:
+
+### Go To Field (gtf)
+
+Paths to navigate from your hive to gathering fields.
+
+<CardGroup cols={3}>
+  <Card title="Bamboo" icon="bamboo">gtf-bamboo.ahk</Card>
+  <Card title="Blue Flower" icon="flower">gtf-blueflower.ahk</Card>
+  <Card title="Cactus" icon="cactus">gtf-cactus.ahk</Card>
+  <Card title="Clover" icon="clover">gtf-clover.ahk</Card>
+  <Card title="Coconut" icon="coconut">gtf-coconut.ahk</Card>
+  <Card title="Dandelion" icon="dandelion">gtf-dandelion.ahk</Card>
+  <Card title="Mountain Top" icon="mountain">gtf-mountaintop.ahk</Card>
+  <Card title="Mushroom" icon="mushroom">gtf-mushroom.ahk</Card>
+  <Card title="Pepper" icon="pepper-hot">gtf-pepper.ahk</Card>
+  <Card title="Pine Tree" icon="tree">gtf-pinetree.ahk</Card>
+  <Card title="Pineapple" icon="apple-whole">gtf-pineapple.ahk</Card>
+  <Card title="Pumpkin" icon="pumpkin">gtf-pumpkin.ahk</Card>
+  <Card title="Rose" icon="rose">gtf-rose.ahk</Card>
+  <Card title="Spider" icon="spider">gtf-spider.ahk</Card>
+  <Card title="Strawberry" icon="strawberry">gtf-strawberry.ahk</Card>
+  <Card title="Stump" icon="tree">gtf-stump.ahk</Card>
+  <Card title="Sunflower" icon="sun">gtf-sunflower.ahk</Card>
+</CardGroup>
+
+### Walk From Field (wf)
+
+Paths to return from fields to your hive after gathering.
+
+<CardGroup cols={3}>
+  <Card title="Bamboo" icon="bamboo">wf-bamboo.ahk</Card>
+  <Card title="Blue Flower" icon="flower">wf-blueflower.ahk</Card>
+  <Card title="Cactus" icon="cactus">wf-cactus.ahk</Card>
+  <Card title="Clover" icon="clover">wf-clover.ahk</Card>
+  <Card title="Coconut" icon="coconut">wf-coconut.ahk</Card>
+  <Card title="Dandelion" icon="dandelion">wf-dandelion.ahk</Card>
+  <Card title="Mountain Top" icon="mountain">wf-mountaintop.ahk</Card>
+  <Card title="Mushroom" icon="mushroom">wf-mushroom.ahk</Card>
+  <Card title="Pepper" icon="pepper-hot">wf-pepper.ahk</Card>
+  <Card title="Pine Tree" icon="tree">wf-pinetree.ahk</Card>
+  <Card title="Pineapple" icon="apple-whole">wf-pineapple.ahk</Card>
+  <Card title="Pumpkin" icon="pumpkin">wf-pumpkin.ahk</Card>
+  <Card title="Rose" icon="rose">wf-rose.ahk</Card>
+  <Card title="Spider" icon="spider">wf-spider.ahk</Card>
+  <Card title="Strawberry" icon="strawberry">wf-strawberry.ahk</Card>
+  <Card title="Stump" icon="tree">wf-stump.ahk</Card>
+  <Card title="Sunflower" icon="sun">wf-sunflower.ahk</Card>
+</CardGroup>
+
+### Go To Planter (gtp)
+
+Paths to plant planters in fields. Same field list as gtf.
+
+### Go To Booster (gtb)
+
+Paths to collect field boosters.
+
+<CardGroup cols={3}>
+  <Card title="Blue Booster" icon="circle" iconType="solid" color="#4A90E2">gtb-blue.ahk</Card>
+  <Card title="Red Booster" icon="circle" iconType="solid" color="#E24A4A">gtb-red.ahk</Card>
+  <Card title="Mountain Booster" icon="circle" iconType="solid" color="#9B59B6">gtb-mountain.ahk</Card>
+</CardGroup>
+
+### Go To Collect (gtc)
+
+Paths to collect from machines, dispensers, and special locations.
+
+<Accordion title="View All Collection Paths">
+  **Machines & Dispensers:**
+  - gtc-blender.ahk
+  - gtc-honeydis.ahk
+  - gtc-treatdis.ahk  
+  - gtc-blueberrydis.ahk
+  - gtc-strawberrydis.ahk
+  - gtc-coconutdis.ahk
+  - gtc-gluedis.ahk
+  - gtc-royaljellydis.ahk
+  - gtc-clock.ahk
+  - gtc-antpass.ahk
+  - gtc-robopass.ahk
+  - gtc-windshrine.ahk
+  - gtc-honeylb.ahk (Honey Bee Gate)
+  - gtc-honeystorm.ahk
+  
+  **Beesmas Items:**
+  - gtc-stockings.ahk
+  - gtc-wreath.ahk
+  - gtc-feast.ahk
+  - gtc-gingerbread.ahk
+  - gtc-snowmachine.ahk
+  - gtc-candles.ahk
+  - gtc-samovar.ahk
+  - gtc-lidart.ahk
+  
+  **Special Items:**  
+  - gtc-gummybeacon.ahk
+  - gtc-rbpdelevel.ahk
+  - gtc-stickerstack.ahk
+  - gtc-stickerprinter.ahk
+  
+  **Memory Match:**
+  - gtc-normalmm.ahk
+  - gtc-megamm.ahk
+  - gtc-extrememm.ahk
+  - gtc-nightmm.ahk
+  - gtc-wintermm.ahk
+</Accordion>
+
+### Go To Questgiver (gtq)
+
+Paths to quest NPCs.
+
+<CardGroup cols={3}>
+  <Card title="Black Bear" icon="bear">gtq-black.ahk</Card>
+  <Card title="Brown Bear" icon="bear">gtq-brown.ahk</Card>
+  <Card title="Bucko Bee" icon="bee">gtq-bucko.ahk</Card>
+  <Card title="Honey Bee" icon="bee">gtq-honey.ahk</Card>
+  <Card title="Polar Bear" icon="bear">gtq-polar.ahk</Card>
+  <Card title="Riley Bee" icon="bee">gtq-riley.ahk</Card>
+</CardGroup>
+
+## Path Syntax
+
+Paths use movement and rotation commands:
+
+<CodeGroup>
+```ahk Example: Go To Sunflower
+nm_gotoramp()
+nm_Walk(9, BackKey)
+nm_Walk(6.75, BackKey, RightKey)
+send "{" RotRight " 2}"
+nm_Walk(29, RightKey)
+;path 230212 zaappiix
+```
+
+```ahk Example: Walk From Sunflower  
+send "{" RotLeft " 2}"
+nm_Walk(13.5, RightKey) ;walk to edge of field
+nm_Walk(45, FwdKey)     ;walk to corner
+nm_Walk(2.25, BackKey)  ;back out of corner
+nm_Walk(25, FwdKey, LeftKey) ;move diagonally towards hives
+nm_Walk(13.5, FwdKey)   ;walk towards hives
+nm_Walk(1.5, BackKey)   ;walk backwards to avoid hives
+nm_Walk(10, RightKey)   ;walk to ramp
+nm_Walk(2.7, BackKey)   ;center with hive pads
+```
+
+```ahk Example: Go To Planter (Sunflower)
+nm_gotoramp()
+nm_Walk(14, BackKey)
+send "{" RotRight " 1}"
+nm_Walk(25, RightKey)
+nm_Walk(15, FwdKey)
+nm_Walk(9, BackKey)
+send "{" RotRight " 1}"
+```
+</CodeGroup>
+
+## Path Functions
+
+<ParamField path="nm_gotoramp()" type="function">
+  Navigate from any hive slot to the ramp in front of the hives. This is the starting point for most paths.
+</ParamField>
+
+<ParamField path="nm_Walk(tiles, key1, key2?)" type="function">
+  Walk for specified number of tiles in direction(s).
+  
+  **Parameters:**
+  - `tiles` - Distance to walk in tiles
+  - `key1` - Primary direction (FwdKey, BackKey, LeftKey, RightKey)
+  - `key2` - Optional secondary direction for diagonal movement
+  
+  **Examples:**
+  - `nm_Walk(10, FwdKey)` - Walk forward 10 tiles
+  - `nm_Walk(5, BackKey, RightKey)` - Walk diagonally backward-right 5 tiles
+</ParamField>
+
+<ParamField path="send {RotLeft/RotRight N}" type="function">
+  Rotate camera left or right N times.
+  
+  **Examples:**
+  - `send "{" RotRight " 2}"` - Rotate camera right twice
+  - `send "{" RotLeft " 1}"` - Rotate camera left once
+</ParamField>
+
+## Movement Keys
+
+Paths reference these key variables:
+
+- `FwdKey` - Forward (default: W / sc011)
+- `BackKey` - Backward (default: S / sc01f)  
+- `LeftKey` - Left (default: A / sc01e)
+- `RightKey` - Right (default: D / sc020)
+- `RotLeft` - Rotate camera left (default: , / sc033)
+- `RotRight` - Rotate camera right (default: . / sc034)
+- `RotUp` - Rotate camera up (default: PgUp / sc149)
+- `RotDown` - Rotate camera down (default: PgDn / sc151)
+
+## Path Customization
+
+<Warning>
+Only modify paths if you have non-standard hive slot positions or custom private server maps. Most users should use default paths.
+</Warning>
+
+To customize a path:
+
+1. Copy the path file from `paths/` to `settings/imported/`
+2. Edit the copied file with your changes
+3. Test thoroughly to ensure navigation works
+4. The macro will use your custom path instead of the default
+
+### Path Testing Tips
+
+<Steps>
+  <Step title="Test in Safe Environment">
+    Test paths in a private server to avoid interference from other players.
+  </Step>
+  
+  <Step title="Check Movement Speed">
+    Ensure your MoveSpeedNum setting matches your character's actual speed.
+  </Step>
+  
+  <Step title="Verify Camera Angle">
+    Most paths assume default camera zoom and angle. Adjust if needed.
+  </Step>
+  
+  <Step title="Account for Lag">
+    Add small delays if your connection is unstable:
+    ```ahk
+    nm_Walk(10, FwdKey)
+    Sleep 100  ; Small delay for lag
+    ```
+  </Step>
+</Steps>
+
+## Path Import
+
+From `natro_macro.ahk:307-352`, the macro imports all paths automatically:
+
+<CodeGroup>
+```ahk Path Import Code  
+nm_importPaths()
+{
+    static path_names := Map(
+        "gtb", ["blue", "mountain", "red"],
+        "gtc", ["clock", "antpass", "robopass", "honeydis", ...],
+        "gtf", ["bamboo", "blueflower", "cactus", ...],
+        "gtp", ["bamboo", "blueflower", "cactus", ...],
+        "gtq", ["black", "brown", "bucko", "honey", "polar", "riley"],
+        "wf",  ["bamboo", "blueflower", "cactus", ...]
+    )
+    
+    global paths := Map()
+    paths.CaseSense := 0
+    
+    for k, list in path_names
+    {
+        (paths[k] := Map()).CaseSense := 0
+        for v in list
+        {
+            file := FileOpen(A_WorkingDir "\paths\" k "-" v ".ahk", "r")
+            paths[k][v] := file.Read()
+            file.Close()
+        }
+    }
+}
+```
+</CodeGroup>
+
+## Troubleshooting
+
+**Character gets stuck during navigation**
+- Verify movement speed setting is accurate
+- Check for obstacles in the path
+- Ensure camera zoom is at default level
+- Test with lower graphics settings if FPS is low
+
+**Path doesn't reach destination**  
+- Check your hive slot is set correctly
+- Verify you're using the right path type (gtf vs gtp vs wf)
+- Look for deprecated path syntax errors
+- Test movement keys work correctly in-game
+
+**Navigation is inconsistent**
+- Reduce KeyDelay if movements are too slow
+- Increase KeyDelay if movements overshoot
+- Check for server lag or high ping
+- Ensure Roblox graphics settings are stable
+
+**Missing path error on startup**
+- Verify all default path files exist in `paths/` folder
+- Redownload the macro if files are missing  
+- Check file names match expected format: `{type}-{name}.ahk`
+- Ensure files have `.ahk` extension, not `.ahk.txt`
+
+## Advanced: Creating Custom Paths
+
+If you need a custom path for a unique situation:
+
+1. Record your manual path by noting directions and distances
+2. Create a new `.ahk` file in `paths/` folder
+3. Use `nm_Walk()` and rotation commands to recreate the path
+4. Test extensively before using in production
+
+<CodeGroup>
+```ahk Custom Path Template
+; Custom path to [destination]
+; Author: [your name]
+; Date: [date]
+; Hive slot: [slot number]
+
+nm_gotoramp()  ; Start from ramp
+
+; Add your movement commands
+nm_Walk(10, FwdKey)
+send "{" RotRight " 2}"
+nm_Walk(5, RightKey)
+
+; Continue until destination reached
+```
+</CodeGroup>
+
+<Warning>
+Custom paths may break after Bee Swarm Simulator updates that change map layout. Always have backups of default paths.
+</Warning>

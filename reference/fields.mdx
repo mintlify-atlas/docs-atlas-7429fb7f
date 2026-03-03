@@ -1,0 +1,250 @@
+---
+title: Fields
+description: Complete reference for all 17 fields in Bee Swarm Simulator, including field boosters, stacks, and characteristics
+---
+
+## Overview
+
+Bee Swarm Simulator features 17 unique fields where players can gather pollen. Each field has different characteristics, boosters, and recommended strategies.
+
+## Field Boosters
+
+Field boosters enhance gathering efficiency in specific fields. The macro tracks booster types and their stack counts for optimal farming.
+
+### Booster Types
+
+- **Blue Booster** - Enhances blue pollen collection
+- **Red Booster** - Enhances red pollen collection  
+- **Mountain Booster** - Enhances white/mountain pollen collection
+- **None** - No booster available
+
+## Field Reference
+
+### Blue Fields
+
+Fields that benefit from Blue Field Boosters.
+
+<CardGroup cols={2}>
+  <Card title="Blue Flower Field" icon="flower">
+    **Booster:** Blue  
+    **Stacks:** 3  
+    **Level:** Starter  
+    
+    The best blue field for stacking blue field boosters. Located near the spawn area.
+  </Card>
+
+  <Card title="Bamboo Field" icon="leaf">
+    **Booster:** Blue  
+    **Stacks:** 1  
+    **Level:** Intermediate  
+    
+    Mid-tier blue field with single booster stack. Good for balanced blue pollen farming.
+  </Card>
+
+  <Card title="Pine Tree Field" icon="tree">
+    **Booster:** Blue  
+    **Stacks:** 1  
+    **Level:** Advanced  
+    
+    High-level blue field located in the upper areas of the map.
+  </Card>
+
+  <Card title="Stump Field" icon="tree-deciduous">
+    **Booster:** Blue  
+    **Stacks:** 1  
+    **Level:** Intermediate  
+    
+    Popular farming location with single blue booster stack.
+  </Card>
+</CardGroup>
+
+### Red Fields
+
+Fields that benefit from Red Field Boosters.
+
+<CardGroup cols={2}>
+  <Card title="Mushroom Field" icon="mushroom">
+    **Booster:** Red  
+    **Stacks:** 3  
+    **Level:** Intermediate  
+    
+    The best red field for stacking red field boosters. Excellent for red pollen farming.
+  </Card>
+
+  <Card title="Strawberry Field" icon="strawberry">
+    **Booster:** Red  
+    **Stacks:** 1  
+    **Level:** Starter  
+    
+    Early-game red field near spawn area.
+  </Card>
+
+  <Card title="Rose Field" icon="rose">
+    **Booster:** Red  
+    **Stacks:** 1  
+    **Level:** Intermediate  
+    
+    Mid-tier red field with single booster stack.
+  </Card>
+
+  <Card title="Pepper Field" icon="pepper-hot">
+    **Booster:** Red  
+    **Stacks:** 1  
+    **Level:** Advanced  
+    
+    High-level red field for advanced players.
+  </Card>
+</CardGroup>
+
+### Mountain (White) Fields
+
+Fields that benefit from Mountain Field Boosters.
+
+<CardGroup cols={2}>
+  <Card title="Sunflower Field" icon="sun">
+    **Booster:** Mountain  
+    **Stacks:** 3  
+    **Level:** Starter  
+    
+    Starter field with excellent mountain booster stacking (3 stacks).
+  </Card>
+
+  <Card title="Dandelion Field" icon="dandelion">
+    **Booster:** Mountain  
+    **Stacks:** 3  
+    **Level:** Starter  
+    
+    Another starter field with 3 mountain booster stacks, located near spawn.
+  </Card>
+
+  <Card title="Clover Field" icon="clover">
+    **Booster:** Mountain  
+    **Stacks:** 2  
+    **Level:** Intermediate  
+    
+    Mid-tier field with 2 mountain booster stacks.
+  </Card>
+
+  <Card title="Spider Field" icon="spider">
+    **Booster:** Mountain  
+    **Stacks:** 2  
+    **Level:** Advanced  
+    
+    Advanced field with 2 mountain booster stacks and spider mob spawns.
+  </Card>
+
+  <Card title="Pineapple Field" icon="pineapple">
+    **Booster:** Mountain  
+    **Stacks:** 2  
+    **Level:** Intermediate  
+    
+    Tropical themed field with 2 mountain booster stacks.
+  </Card>
+
+  <Card title="Pumpkin Field" icon="pumpkin">
+    **Booster:** Mountain  
+    **Stacks:** 1  
+    **Level:** Intermediate  
+    
+    Seasonal themed field with single mountain booster stack.
+  </Card>
+
+  <Card title="Cactus Field" icon="cactus">
+    **Booster:** Mountain  
+    **Stacks:** 1  
+    **Level:** Advanced  
+    
+    Desert themed field with single mountain booster stack.
+  </Card>
+</CardGroup>
+
+### Special Fields
+
+Fields without standard field boosters.
+
+<CardGroup cols={2}>
+  <Card title="Mountain Top Field" icon="mountain">
+    **Booster:** None  
+    **Stacks:** 0  
+    **Level:** End-game  
+    
+    The highest field in the game with no field booster support. Requires advanced movement to access.
+  </Card>
+
+  <Card title="Coconut Field" icon="coconut">
+    **Booster:** None  
+    **Stacks:** 0  
+    **Level:** Advanced  
+    
+    Island field with no field booster support. Accessed via special paths.
+  </Card>
+</CardGroup>
+
+## Field Booster Configuration
+
+The macro uses the following FieldBooster map for automatic field selection:
+
+```ahk
+FieldBooster := Map(
+    "pine tree", {booster:"blue", stacks:1},
+    "bamboo", {booster:"blue", stacks:1},
+    "blue flower", {booster:"blue", stacks:3},
+    "stump", {booster:"blue", stacks:1},
+    "rose", {booster:"red", stacks:1},
+    "strawberry", {booster:"red", stacks:1},
+    "mushroom", {booster:"red", stacks:3},
+    "pepper", {booster:"red", stacks:1},
+    "sunflower", {booster:"mountain", stacks:3},
+    "dandelion", {booster:"mountain", stacks:3},
+    "spider", {booster:"mountain", stacks:2},
+    "clover", {booster:"mountain", stacks:2},
+    "pineapple", {booster:"mountain", stacks:2},
+    "pumpkin", {booster:"mountain", stacks:1},
+    "cactus", {booster:"mountain", stacks:1},
+    "mountain top", {booster:"none", stacks:0},
+    "coconut", {booster:"none", stacks:0}
+)
+```
+
+## Path Files
+
+Each field has associated path files in the `paths` directory:
+
+- **gtf-[field].ahk** - Go to field paths
+- **gtp-[field].ahk** - Go to planter paths (for planter placement)
+- **wf-[field].ahk** - Walk field paths (gathering patterns)
+
+## Usage Tips
+
+<AccordionGroup>
+  <Accordion title="Maximizing Booster Stacks">
+    Focus on fields with 3 stacks (Blue Flower, Mushroom, Sunflower, Dandelion) when you have the corresponding field booster active.
+  </Accordion>
+
+  <Accordion title="Quest Farming">
+    Many quests require gathering from specific fields. The macro automatically navigates to quest-specified fields when quest gathering is enabled.
+  </Accordion>
+
+  <Accordion title="Field Selection Strategy">
+    - **Early game**: Focus on Sunflower, Dandelion, and Blue Flower for high booster stacks
+    - **Mid game**: Expand to Mushroom, Clover, and Bamboo fields
+    - **Late game**: Include Pepper, Pine Tree, Spider, and Cactus fields
+    - **End game**: Mountain Top and Coconut for specific resources
+  </Accordion>
+
+  <Accordion title="Movement Methods">
+    Fields can be accessed via:
+    - **Walk** - Standard pathfinding from hive/ramp
+    - **Cannon** - Faster access using the cannon (requires proper timing)
+    
+    The macro automatically selects the appropriate method based on your `MoveMethod` configuration.
+  </Accordion>
+</AccordionGroup>
+
+## Related Configuration
+
+See the [Configuration Guide](/configuration/settings) for field-related settings:
+- Field gathering patterns
+- Field rotation settings
+- Field booster management
+- Quest field priorities

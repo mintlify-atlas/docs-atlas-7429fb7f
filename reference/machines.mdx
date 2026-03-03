@@ -1,0 +1,471 @@
+---
+title: Machines & Collectibles
+description: Complete reference for all machines, dispensers, and collectible items in Bee Swarm Simulator
+---
+
+## Overview
+
+Bee Swarm Simulator features numerous machines and collectibles that provide resources, buffs, and items. The macro can automatically collect from these sources on configurable timers.
+
+## Dispensers
+
+Dispensers provide free items on a regular cooldown.
+
+<CardGroup cols={2}>
+  <Card title="Honey Dispenser" icon="honey-pot">
+    **Location:** Near hive  
+    **Cooldown:** 1 hour  
+    **Provides:** Honey
+    
+    Basic honey dispenser available to all players. Provides bonus honey for progression.
+  </Card>
+
+  <Card title="Treat Dispenser" icon="candy">
+    **Location:** Near spawn  
+    **Cooldown:** 1 hour  
+    **Provides:** Treats
+    
+    Provides treats for feeding bees and increasing their bond levels.
+  </Card>
+
+  <Card title="Blueberry Dispenser" icon="blueberries">
+    **Location:** Blue field area  
+    **Cooldown:** 1 hour  
+    **Provides:** Blueberries
+    
+    Blue-themed dispenser providing blueberries for various uses.
+  </Card>
+
+  <Card title="Strawberry Dispenser" icon="strawberry">
+    **Location:** Red field area  
+    **Cooldown:** 1 hour  
+    **Provides:** Strawberries
+    
+    Red-themed dispenser providing strawberries for various uses.
+  </Card>
+
+  <Card title="Coconut Dispenser" icon="coconut">
+    **Location:** Coconut Field  
+    **Cooldown:** 1 hour  
+    **Provides:** Coconuts
+    
+    Advanced dispenser on Coconut Field island.
+  </Card>
+
+  <Card title="Glue Dispenser" icon="droplet">
+    **Location:** Mountain area  
+    **Cooldown:** 1 hour  
+    **Provides:** Glue
+    
+    Provides glue for crafting and gummy items.
+  </Card>
+
+  <Card title="Royal Jelly Dispenser" icon="gem">
+    **Location:** Mid area  
+    **Cooldown:** 1 hour  
+    **Provides:** Royal Jelly
+    
+    Dispenses royal jelly for hatching better bees.
+  </Card>
+</CardGroup>
+
+## Core Machines
+
+<CardGroup cols={2}>
+  <Card title="Blender" icon="blender">
+    **Location:** Near hive  
+    **Function:** Crafts smoothies and items  
+    
+    The blender combines ingredients to create powerful smoothies and items. The macro supports automated blending with configurable recipes.
+    
+    **Configuration:**
+    - Up to 3 simultaneous blend recipes
+    - Configurable amounts and repeat counts
+    - Infinite repeat option available
+    
+    ```ini
+    [Blender]
+    BlenderCheck=1
+    BlenderItem1=None
+    BlenderItem2=None  
+    BlenderItem3=None
+    BlenderAmount1=0
+    BlenderAmount2=0
+    BlenderAmount3=0
+    BlenderIndex1=1  # Repeat count (or "Infinite")
+    BlenderIndex2=1
+    BlenderIndex3=1
+    ```
+  </Card>
+
+  <Card title="Wealth Clock" icon="clock">
+    **Location:** Wealth Clock area  
+    **Cooldown:** 1 hour  
+    **Provides:** Honey bonus
+    
+    Collecting from the Wealth Clock provides a significant honey bonus.
+  </Card>
+
+  <Card title="Wind Shrine" icon="wind">
+    **Location:** Sunflower/Dandelion area  
+    **Function:** Donates items for buffs  
+    
+    Donate cloud vials or other items to receive powerful wind shrine buffs.
+  </Card>
+
+  <Card title="Ant Pass" icon="ticket">
+    **Location:** Ant Gate  
+    **Cooldown:** Variable  
+    **Function:** Access to ant challenges  
+    
+    **Actions:**
+    - **Pass** - Enter ant challenge
+    - **Challenge** - Start ant challenge (uses tickets if enabled)
+    
+    ```ini
+    [Collect]
+    AntPassCheck=0
+    AntPassAction=Pass  # or "Challenge"
+    AntPassBuyCheck=0   # Use tickets
+    ```
+  </Card>
+
+  <Card title="Robo Pass" icon="robot">
+    **Location:** Robo area (beta)  
+    **Cooldown:** Variable  
+    **Function:** Access to robo challenges  
+    
+    Similar to Ant Pass but for robo-themed challenges.
+  </Card>
+</CardGroup>
+
+## Memory Match Games
+
+Memory Match games provide rewards for matching pairs.
+
+<CardGroup cols={2}>
+  <Card title="Normal Memory Match" icon="brain">
+    **Difficulty:** Easy  
+    **Location:** Main area  
+    **Rewards:** Basic items and honey
+  </Card>
+
+  <Card title="Mega Memory Match" icon="brain">
+    **Difficulty:** Medium  
+    **Location:** Main area  
+    **Rewards:** Enhanced items and honey
+  </Card>
+
+  <Card title="Extreme Memory Match" icon="brain">
+    **Difficulty:** Hard  
+    **Location:** Main area  
+    **Rewards:** Premium items and honey
+  </Card>
+
+  <Card title="Night Memory Match" icon="moon">
+    **Difficulty:** Medium  
+    **Location:** Night area  
+    **Rewards:** Night-themed items
+    
+    **Dependency:** Requires `BeesmasGatherInterruptCheck` for optimal play
+  </Card>
+
+  <Card title="Winter Memory Match" icon="snowflake">
+    **Difficulty:** Medium  
+    **Location:** Beesmas area  
+    **Seasonal:** Beesmas event only
+    **Rewards:** Winter-themed items
+  </Card>
+</CardGroup>
+
+### Memory Match Configuration
+
+```ini
+[Collect]
+NormalMemoryMatchCheck=0
+MegaMemoryMatchCheck=0
+ExtremeMemoryMatchCheck=0
+NightMemoryMatchCheck=0
+WinterMemoryMatchCheck=0
+MemoryMatchInterruptCheck=0  # Allow gather interrupt
+```
+
+## Beesmas Machines
+
+<Warning>
+Beesmas machines are only available during the annual Beesmas event (typically December-January).
+</Warning>
+
+<CardGroup cols={2}>
+  <Card title="Stockings" icon="sock">
+    **Seasonal:** Beesmas  
+    **Cooldown:** Variable  
+    **Provides:** Beesmas tokens and items
+    
+    Collect from stockings scattered around the map during Beesmas.
+  </Card>
+
+  <Card title="Honey Wreath" icon="wreath">
+    **Seasonal:** Beesmas  
+    **Cooldown:** Variable  
+    **Provides:** Honey and Beesmas items
+    
+    Decorative wreath that dispenses rewards during Beesmas.
+  </Card>
+
+  <Card title="Feast" icon="turkey">
+    **Seasonal:** Beesmas  
+    **Cooldown:** Variable  
+    **Provides:** Food buffs and items
+    
+    Participate in the Beesmas feast for powerful buffs.
+  </Card>
+
+  <Card title="Gingerbread House" icon="house">
+    **Seasonal:** Beesmas  
+    **Cooldown:** Variable  
+    **Provides:** Gingerbread and special items
+    
+    Visit the gingerbread house for Beesmas rewards.
+  </Card>
+
+  <Card title="Snow Machine" icon="snowflake">
+    **Seasonal:** Beesmas  
+    **Cooldown:** Variable  
+    **Provides:** Snow-themed buffs
+    
+    Activate snow effects and receive winter buffs.
+  </Card>
+
+  <Card title="Candles" icon="candle">
+    **Seasonal:** Beesmas  
+    **Cooldown:** Variable  
+    **Provides:** Warmth buff and items
+    
+    Light candles for warmth buffs during Beesmas.
+  </Card>
+
+  <Card title="Samovar" icon="teapot">
+    **Seasonal:** Beesmas  
+    **Cooldown:** Variable  
+    **Provides:** Tea buffs and items
+    
+    Collect tea from the samovar for powerful buffs.
+  </Card>
+
+  <Card title="Lid Art" icon="palette">
+    **Seasonal:** Beesmas  
+    **Cooldown:** Variable  
+    **Provides:** Creative rewards
+    
+    Participate in lid art for unique Beesmas items.
+  </Card>
+</CardGroup>
+
+### Beesmas Configuration
+
+```ini
+[Collect]
+StockingsCheck=0
+WreathCheck=0
+FeastCheck=0
+GingerbreadCheck=0
+SnowMachineCheck=0
+CandlesCheck=0
+WinterMemoryMatchCheck=0
+SamovarCheck=0
+LidArtCheck=0
+BeesmasGatherInterruptCheck=1  # Allow gathering interrupt for Beesmas activities
+```
+
+## Special Machines
+
+<CardGroup cols={2}>
+  <Card title="Gummy Beacon" icon="beacon">
+    **Location:** Gummy area  
+    **Function:** Activate gummy buffs  
+    
+    Place gummy beacons to enhance gummy bee abilities and pollen collection.
+  </Card>
+
+  <Card title="Sticker Stack" icon="sticker">
+    **Location:** Sticker area  
+    **Function:** Stack stickers for collection  
+    
+    **Mode Options:**
+    - **Detect** - Auto-detect when stack is ready
+    - **Timer** - Collect on fixed interval (900-86400 seconds)
+    
+    **Items:**
+    - Tickets
+    - Hive skins
+    - Cub Buddy skins  
+    - Vouchers
+    
+    ```ini
+    [Stickers]
+    StickerStackCheck=0
+    StickerStackMode=0          # 0=Detect, 1=Timer
+    StickerStackTimer=900       # Seconds (if timer mode)
+    StickerStackItem=Tickets    # Target item
+    StickerStackHive=0          # Collect hive skins
+    StickerStackCub=0           # Collect cub skins
+    StickerStackVoucher=0       # Collect vouchers
+    ```
+  </Card>
+
+  <Card title="Sticker Printer" icon="printer">
+    **Location:** Sticker area  
+    **Function:** Print stickers from eggs  
+    
+    **Egg Types:**
+    - Basic
+    - Rare
+    - Epic
+    - Legendary
+    - Mythic
+    
+    ```ini
+    [Stickers]  
+    StickerPrinterCheck=0
+    StickerPrinterEgg=Basic
+    ```
+  </Card>
+
+  <Card title="RBP Delevel" icon="level-down">
+    **Location:** RBP area  
+    **Function:** Delevel RBP for rewards  
+    
+    Strategically delevel RBP (Royal Battle Pass) for specific rewards.
+  </Card>
+</CardGroup>
+
+## World Events
+
+<CardGroup cols={2}>
+  <Card title="Honey Storm" icon="cloud-bolt">
+    **Type:** Random event  
+    **Duration:** Limited time  
+    **Provides:** Massive honey bonus
+    
+    The macro can detect and participate in honey storms automatically.
+  </Card>
+
+  <Card title="Honeylb (Honey Bee)" icon="honey-pot">
+    **Type:** Special event  
+    **Duration:** Limited time  
+    **Provides:** Honey and bonuses
+    
+    Special honey bee events that provide enhanced rewards.
+  </Card>
+</CardGroup>
+
+## Path Files
+
+All machine paths are stored in the `paths` directory with the `gtc-` prefix (go to collect):
+
+### Dispensers
+- `gtc-honeydis.ahk`
+- `gtc-treatdis.ahk`
+- `gtc-blueberrydis.ahk`
+- `gtc-strawberrydis.ahk`
+- `gtc-coconutdis.ahk`
+- `gtc-gluedis.ahk`
+- `gtc-royaljellydis.ahk`
+
+### Core Machines
+- `gtc-blender.ahk`
+- `gtc-clock.ahk`
+- `gtc-WindShrine.ahk`
+- `gtc-antpass.ahk`
+- `gtc-robopass.ahk`
+
+### Memory Match
+- `gtc-normalmm.ahk`
+- `gtc-megamm.ahk`
+- `gtc-extrememm.ahk`
+- `gtc-nightmm.ahk`
+- `gtc-wintermm.ahk`
+
+### Beesmas Machines
+- `gtc-stockings.ahk`
+- `gtc-wreath.ahk`
+- `gtc-feast.ahk`
+- `gtc-gingerbread.ahk`
+- `gtc-snowmachine.ahk`
+- `gtc-candles.ahk`
+- `gtc-samovar.ahk`
+- `gtc-lidart.ahk`
+
+### Special Machines
+- `gtc-gummybeacon.ahk`
+- `gtc-stickerstack.ahk`
+- `gtc-stickerPrinter.ahk`
+- `gtc-rbpdelevel.ahk`
+- `gtc-honeystorm.ahk`
+- `gtc-honeylb.ahk`
+
+## Collection Priority
+
+The macro collects from machines in a specific order for optimal efficiency:
+
+<Steps>
+  <Step title="High Priority">
+    - Wealth Clock (honey bonus)
+    - Dispensers (free resources)
+    - Blender (if recipes configured)
+  </Step>
+  
+  <Step title="Medium Priority">
+    - Memory Match games
+    - Ant Pass / Robo Pass
+    - Sticker machines
+  </Step>
+  
+  <Step title="Low Priority / Event-Based">
+    - Beesmas machines (seasonal)
+    - Special events (Honey Storm)
+    - Optional collectibles
+  </Step>
+</Steps>
+
+## Automation Tips
+
+<AccordionGroup>
+  <Accordion title="Optimize Collection Timing">
+    Enable only the machines you need to reduce unnecessary travel time. Disable seasonal machines when events are not active.
+  </Accordion>
+
+  <Accordion title="Blender Recipes">
+    Configure up to 3 simultaneous blender recipes. Use the "Infinite" repeat option for continuous crafting of frequently-needed items.
+  </Accordion>
+
+  <Accordion title="Memory Match Strategy">
+    Enable memory match gather interrupt only if you want to prioritize memory match over farming. This can reduce honey/pollen gains but provides valuable items.
+  </Accordion>
+
+  <Accordion title="Sticker Stack Detection">
+    Use "Detect" mode for sticker stack to automatically collect when stacks are ready, rather than fixed timers which may miss or waste stacks.
+  </Accordion>
+
+  <Accordion title="Ant Pass Optimization">
+    If running Bucko or Riley quests, enable Ant Pass with "Challenge" action and ticket usage for maximum quest completion efficiency.
+  </Accordion>
+</AccordionGroup>
+
+## GUI Controls
+
+The macro GUI provides controls for all collectible items:
+
+- **Checkboxes** - Enable/disable each machine
+- **Action selectors** - Choose specific actions (e.g., Ant Pass: Pass vs Challenge)
+- **Item selectors** - Choose specific items (e.g., Sticker Stack: Tickets, Hive, Cub, Voucher)
+- **Options buttons** - Access advanced settings (e.g., Memory Match options)
+
+## Related Configuration
+
+See the [Configuration Guide](/configuration/settings) for machine-related settings:
+- Collection enable/disable toggles
+- Cooldown timers and tracking
+- Gather interrupt options
+- Seasonal event configuration

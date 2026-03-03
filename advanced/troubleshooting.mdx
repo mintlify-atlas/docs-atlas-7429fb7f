@@ -1,0 +1,691 @@
+---
+title: Troubleshooting Guide
+description: Common issues, solutions, and fixes for Natro Macro problems
+---
+
+This guide covers common problems and their solutions. Check here before asking for help!
+
+## Critical Errors
+
+### AutoHotkey32.exe Missing
+
+This is the most common installation issue.
+
+<Warning>
+**Error Message (from START.bat:31-42):**
+```
+Could not find submacros\AutoHotkey32.exe!
+This is most likely due to a third-party antivirus deleting the file:
+ 1. Disable any third-party antivirus software (or add the Natro Macro folder as an exception)
+ 2. Re-extract the macro and check that AutoHotkey32.exe exists in 'submacros' folder
+ 3. Run START.bat
+
+Note: Both Natro Macro and AutoHotkey are safe and work fine with Microsoft Defender!
+Join our Discord server for support: discord.gg/natromacro
+```
+</Warning>
+
+**Solutions:**
+
+1. **Check Antivirus Quarantine**
+   - Open your antivirus program
+   - Check quarantine/vault for `AutoHotkey32.exe`
+   - Restore the file
+   - Add Natro Macro folder to exclusions
+
+2. **Re-extract Macro**
+   - Delete current Natro Macro folder
+   - Re-download from official source
+   - Extract to a safe location (Desktop, Downloads)
+   - Verify `AutoHotkey32.exe` exists in `submacros/` folder
+
+3. **Windows Defender (Safe)**
+   - Natro Macro works fine with Windows Defender
+   - No exclusions needed for Defender
+   - Disable third-party antivirus instead
+
+<Info>
+Recommended antivirus: Windows Defender (built-in). Third-party antivirus often causes false positives.
+</Info>
+
+### Admin Privileges Issues
+
+<Warning>
+**Error (from natro_macro.ahk:22509-22516):**
+```
+Your Roblox window is run as admin, but the macro is not!
+This means the macro will be unable to send any inputs to Roblox.
+You must either reinstall Roblox without administrative rights, or run Natro Macro as admin!
+
+NOTE: It is recommended to stop the macro now, as this issue also causes hotkeys 
+to not work while Roblox is active.
+```
+</Warning>
+
+**Why This Happens:**
+- Windows security (UIPI) prevents non-admin programs from controlling admin programs
+- Roblox shouldn't run as admin, but sometimes does
+
+**Solutions:**
+
+<Accordion title="Solution 1: Reinstall Roblox (Recommended)">
+1. Uninstall Roblox completely
+2. Delete `C:\Users\YourName\AppData\Local\Roblox`
+3. Reinstall Roblox WITHOUT running installer as admin
+4. Launch Roblox normally (not as admin)
+5. Restart Natro Macro
+
+This fixes the root cause permanently.
+</Accordion>
+
+<Accordion title="Solution 2: Run Macro as Admin">
+1. Right-click `START.bat`
+2. Select "Run as administrator"
+3. Accept UAC prompt
+
+**Warning:** Auto-Start Manager won't work if macro runs as admin (from natro_macro.ahk:8853-8858):
+```
+Natro Macro has been run as administrator!
+Auto-Start Manager can only launch Natro Macro on logon without admin privileges.
+
+If you need to run Natro Macro as admin, either:
+- fix the reason why admin is required (reinstall Roblox unelevated, move Natro Macro folder)
+- manually set up a Scheduled Task in Task Scheduler with 'Run with highest privileges' checked
+```
+</Accordion>
+
+<Accordion title="Solution 3: Move Macro Folder">
+If Natro Macro is in a protected folder (Program Files, System32), move it:
+
+1. Extract to `C:\Users\YourName\Desktop\Natro Macro`
+2. Or `C:\Users\YourName\Downloads\Natro Macro`  
+3. Avoid system folders requiring admin access
+</Accordion>
+
+### Display Scale (DPI) Issues
+
+<Warning>
+**Error (from natro_macro.ahk:118 & 10450):**
+```
+Display scale is not set to 100%
+```
+</Warning>
+
+**Why This Matters:**
+- Macro uses pixel detection and coordinates
+- Scaling affects pixel positions
+- Can cause misclicks and detection failures
+
+**Solution:**
+
+1. **Windows 10/11:**
+   - Right-click Desktop → Display settings
+   - Scroll to "Scale and layout"
+   - Set to **100%** (not 125%, 150%, etc.)
+   - Click "Apply"
+   - Restart Natro Macro
+
+2. **Check Current Scale:**
+   - Run Natro Macro
+   - Check status/debug info
+   - Shows current resolution and scale percentage
+
+3. **Per-Monitor Scaling:**
+   - If using multiple monitors, set ALL to 100%
+   - Or keep Roblox on the 100% scaled monitor
+
+<Info>
+Your screen resolution is fine at any value. Only the **scale percentage** must be 100%.
+</Info>
+
+## Connection Issues
+
+### Disconnects
+
+The macro detects and handles disconnects automatically.
+
+**Detection (from natro_macro.ahk:17622-17632):**
+
+```ahk
+disconnectCheck()
+{
+    ; Checks for disconnect screen bitmap
+    pBMScreen := Gdip_BitmapFromScreen(windowX+windowWidth//2 "|" 
+                                       windowY+windowHeight//2 "|200|80")
+    if (Gdip_ImageSearch(pBMScreen, bitmaps["disconnected"], , , , , , 2) != 1) {
+        return 0  ; Not disconnected
+    }
+    ; Disconnected - start reconnect process
+}
+```
+
+**Reconnect Process:**
+
+1. **Detection** - Checks for "Disconnected" screen
+2. **Delay** - Waits if Daily Reconnect scheduled
+3. **Server Selection** - Tries Private Server, then Fallbacks
+4. **Method** - Uses Deeplink (default) or Browser
+5. **Retry** - Attempts up to 20 times with different servers
+
+**Reconnect Methods:**
+
+<CodeGroup>
+```txt Deeplink (Recommended)
+Fastest and most reliable method.
+Uses Roblox deeplinks to join directly.
+No browser required.
+
+Set in: Settings → Reconnect Method → Deeplink
+```
+
+```txt Browser (Legacy)
+Older method using web browser.
+Can have issues with:
+- Browser not logged into Roblox  
+- Tabs not closing
+- Slower reconnection
+
+Use only if Deeplink fails.
+```
+</CodeGroup>
+
+**Common Disconnect Causes:**
+
+<Accordion title="Private Server Down">
+**Symptom:** Repeated disconnects, macro can't rejoin
+
+**Solution:**
+- Check if Private Server link still works (open in browser)
+- Server owner may have shut down server
+- Use Public Fallback or different Private Server
+- Enable "Public Fallback" in settings
+</Accordion>
+
+<Accordion title="Internet Connection Issues">
+**Symptom:** Frequent disconnects, long reconnect times
+
+**Solution:**
+- Check your internet stability
+- Restart router/modem
+- Use wired connection instead of WiFi
+- Close bandwidth-heavy applications
+</Accordion>
+
+<Accordion title="Roblox Server Issues">
+**Symptom:** Disconnects affecting all players
+
+**Solution:**
+- Check Roblox status: https://status.roblox.com
+- Wait for Roblox to fix server issues
+- Use different region servers (Private Servers)
+</Accordion>
+
+### Death Detection
+
+The macro automatically detects when you die.
+
+**Detection Code (from background.ahk:96-111):**
+
+```ahk
+nm_deathCheck(){
+    static LastDeathDetected:=0
+    if (((nowUnix()-resetTime)>20) && ((nowUnix()-LastDeathDetected)>10)) {
+        try
+            result := ImageSearch(&FoundX, &FoundY, 
+                                windowX+windowWidth//2, windowY+windowHeight//2, 
+                                windowX+windowWidth, windowY+windowHeight, 
+                                "*50 nm_image_assets\died.png")
+        catch
+            return
+        if (result = 1) {
+            if WinExist("natro_macro ahk_class AutoHotkey") {
+                PostMessage 0x5555, 1, 1
+                Send_WM_COPYDATA("You Died", "natro_macro ahk_class AutoHotkey")
+            }
+            LastDeathDetected := nowUnix()
+        }
+    }
+}
+```
+
+**What Happens:**
+1. Detects "You Died" screen
+2. Notifies main macro
+3. Waits for respawn
+4. Continues macro operation
+5. Updates death counter in stats
+
+**Death Causes:**
+
+- **Mob Damage** - Werewolves, spiders, scorpions, mantises
+- **Tunnel Bear** - Failed or incomplete kill
+- **Mondo Chick** - Failed fight (from natro_macro.ahk:16182)
+- **Stump Snail** - Failed fight
+- **Falling** - Rare, usually from lag
+
+<Info>
+Deaths are tracked in Statistics. High death counts may indicate:
+- Wrong field for your level
+- Need better bees/equipment  
+- Mobs not being killed properly
+</Info>
+
+## GUI & Display Issues
+
+### GUI Not Appearing
+
+**Cause:** Off-screen position or wrong monitor
+
+**Solution:**
+
+1. **Reset Position:**
+   - Close macro
+   - Open `settings\nm_config.ini`
+   - Find `[Settings]` section
+   - Set `GuiX=` and `GuiY=` to empty
+   - Save and restart macro
+
+2. **Check Monitor:**
+   - If using multiple monitors, GUI may be on other screen
+   - Move mouse to other monitors to find it
+   - Drag back to primary monitor
+
+### GUI Transparency Issues
+
+**Cause:** GuiTransparency setting too high
+
+**Solution:**
+- In GUI: Settings tab → GUI Transparency
+- Set to 0 for fully opaque
+- Adjust to preference (0-10)
+
+### Status Bar Not Showing
+
+**Cause:** ShowOnPause disabled or status bar off-screen
+
+**Solution:**
+- Enable "Show On Pause" in Settings
+- Check status bar position
+- Reset position in config file if needed
+
+## Gameplay Issues
+
+### Macro Not Moving Character
+
+<Accordion title="Cause 1: Admin Privileges (See Above)">
+Most common cause. See "Admin Privileges Issues" section.
+</Accordion>
+
+<Accordion title="Cause 2: Wrong Roblox Window">
+**Symptom:** Multiple Roblox windows open
+
+**Solution:**
+1. Close ALL Roblox windows
+2. Close Natro Macro  
+3. Start Natro Macro
+4. Let macro launch Roblox
+5. Don't open additional Roblox windows
+</Accordion>
+
+<Accordion title="Cause 3: Roblox Not Focused">
+**Symptom:** Works when Roblox is focused, stops when not
+
+**Solution:**
+- This is expected behavior for safety
+- Macro only sends inputs when Roblox is active window
+- Don't minimize Roblox while macro runs
+- Can use another monitor for other tasks
+</Accordion>
+
+<Accordion title="Cause 4: Key Binds Changed">
+**Symptom:** Character moves wrong direction or not at all
+
+**Solution:**
+1. In Bee Swarm Simulator, open Settings
+2. Reset controls to default (WASD movement)
+3. Don't change keybinds while using macro
+4. Verify: W=Forward, A=Left, S=Back, D=Right
+</Accordion>
+
+### Macro Stuck / Not Progressing
+
+**Common Stuck Points:**
+
+<Accordion title="Stuck at Hive">
+**Possible Causes:**
+- Path to field is broken
+- Hive slot setting wrong  
+- Collision with other players
+
+**Solutions:**
+1. Check HiveSlot setting (1-6)
+2. Verify field paths exist
+3. Try different field
+4. Restart macro
+</Accordion>
+
+<Accordion title="Stuck in Field">
+**Possible Causes:**
+- Pattern not working
+- Character collision
+- Lag/server issues
+
+**Solutions:**
+1. Try different pattern (Stationary for testing)
+2. Check pattern files exist in `patterns/` folder
+3. Verify MoveSpeedNum setting is correct
+4. Test in different field
+</Accordion>
+
+<Accordion title="Stuck at Planter">
+**Possible Causes:**
+- Can't find planter location  
+- Planter inventory full
+- Path to planter broken
+
+**Solutions:**
+1. Manually place one planter to test
+2. Check planter settings (types enabled)
+3. Verify you have planters in inventory
+4. Test path manually
+</Accordion>
+
+### Unable to Detect GUI Offset
+
+<Warning>
+**Error (from natro_macro.ahk:22519-22525):**
+```
+Unable to detect in-game GUI offset!
+This means the macro will NOT work correctly!
+```
+</Warning>
+
+**Causes:**
+- Roblox UI changed
+- Graphics settings too low
+- Screen recording software interference  
+- Roblox window too small
+
+**Solutions:**
+
+1. **Graphics Settings:**
+   - In Roblox, set Graphics Quality to at least 4/10
+   - Don't use Graphics Level 1 (minimum)
+
+2. **Window Size:**
+   - Don't minimize Roblox
+   - Window must be visible on screen
+   - Avoid very small window sizes
+
+3. **Recording Software:**
+   - Disable overlays (Discord, GeForce Experience, OBS)
+   - Some screen capture tools interfere with detection
+   - Test with all overlays disabled
+
+4. **Restart:**
+   - Close Natro Macro
+   - Close Roblox
+   - Restart both (macro first)
+
+## Configuration Issues
+
+### Settings Not Saving
+
+**Cause:** Config file permissions or corruption
+
+**Solution:**
+
+1. **Check Permissions:**
+   - Right-click `settings\nm_config.ini`
+   - Properties → Security
+   - Ensure you have write permissions
+
+2. **Reset Config:**
+   - Close macro
+   - Rename `nm_config.ini` to `nm_config.ini.backup`
+   - Restart macro (creates new config)
+   - Re-apply your settings
+
+3. **File Location:**
+   - If macro is in OneDrive/Dropbox, sync issues can occur
+   - Move macro to local folder (Desktop, Downloads)
+
+### Private Server Not Working
+
+**Invalid Server Link Error:**
+
+```
+Private Server Invalid
+```
+
+**Cause:** Incorrect link format
+
+**Valid Link Formats:**
+
+```txt LinkCode Format
+https://www.roblox.com/games/1537690962?privateServerLinkCode=ABC123...
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                        32-character code after this
+```
+
+```txt ShareCode Format  
+https://www.roblox.com/share?code=ABC123...&type=Server
+                             ^^^^^^^^^^^^^^
+                             32-character code
+```
+
+**Solution:**
+1. Copy FULL link from Roblox
+2. Include `https://` at start
+3. Don't truncate or modify link
+4. Test link in browser first
+
+## Performance Issues
+
+### Macro Running Slow
+
+**Causes & Solutions:**
+
+<Accordion title="High CPU Usage">
+**Symptom:** Computer laggy, macro slow
+
+**Solution:**
+- Close unnecessary programs
+- Check for background updates
+- Verify computer meets minimum specs
+- Lower Roblox graphics settings
+</Accordion>
+
+<Accordion title="Network Lag">
+**Symptom:** Delays in movement, disconnects
+
+**Solution:**
+- Check internet speed
+- Use wired connection  
+- Close bandwidth-heavy apps
+- Try different server/region
+</Accordion>
+
+<Accordion title="Too Many Planters/Buffs">
+**Symptom:** Macro takes long time per cycle
+
+**Solution:**
+- Reduce active planters
+- Disable some buff boosters
+- Increase planter check intervals
+- Optimize field rotation
+</Accordion>
+
+### Macro Actions Too Fast
+
+**Cause:** MoveSpeedNum set incorrectly
+
+**Solution:**
+
+1. **Calibrate Move Speed:**
+   - Settings → Movement → Move Speed Num
+   - Default: 28
+   - Higher number = faster movement
+   - Adjust based on your actual speed stat
+
+2. **Test:**
+   - Use "Test Walk" button in settings  
+   - Character should walk in square
+   - Adjust until square is accurate
+
+3. **Speed Boosts:**
+   - If using bear morph or speed boosts, increase value
+   - If no speed boosts, keep at ~28
+
+## Error Messages
+
+### Common Error Codes
+
+<CodeGroup>
+```txt E1: Roblox Not Found
+Macro cannot find Roblox window.
+
+Solution:
+- Launch Roblox through macro
+- Don't close Roblox manually
+- Check Roblox isn't minimized
+```
+
+```txt E2: Config File Error  
+Cannot read/write config file.
+
+Solution:
+- Check file permissions
+- Verify settings folder exists
+- Reset config file
+```
+
+```txt E3: Pattern Import Failed
+Pattern file has syntax errors.
+
+Solution:  
+- Check error message details
+- Verify pattern file syntax
+- Remove/replace pattern file
+- Download from trusted source
+```
+
+```txt E4: Path Missing
+Required path file not found.
+
+Solution:
+- Restore default paths
+- Re-download macro
+- Check paths folder contents
+```
+</CodeGroup>
+
+## Getting Help
+
+### Before Asking for Help
+
+<Info>
+Complete this checklist:
+
+- [ ] Read relevant sections of this guide
+- [ ] Check Discord #faq channel
+- [ ] Verify macro is latest version
+- [ ] Test with default settings
+- [ ] Note exact error messages
+- [ ] Record when issue started
+- [ ] List what you've already tried
+</Info>
+
+### Information to Provide
+
+When asking for help, include:
+
+1. **Error Message** - Exact text, screenshot if possible
+2. **What You Were Doing** - Step-by-step to reproduce
+3. **Macro Version** - Check Help → About
+4. **System Info:**
+   - Windows version
+   - Screen resolution and scale
+   - Antivirus software
+5. **Attempted Solutions** - What you've already tried
+
+### Support Channels
+
+<Card title="Discord Server" icon="discord" href="https://discord.gg/natromacro">
+Best for quick help, active community, and official support.
+
+Channels:
+- `#support` - General help
+- `#faq` - Common questions  
+- `#bug-reports` - Report bugs
+</Card>
+
+### Debug Mode
+
+For advanced troubleshooting:
+
+1. Enable debug output in settings
+2. Run macro with debug window open
+3. Note any error messages
+4. Share debug log with support
+
+## Preventive Maintenance
+
+### Regular Checks
+
+<Info>
+**Weekly:**
+- Update macro if new version available
+- Clear temporary files
+- Verify all paths/patterns working
+- Check statistics for anomalies
+
+**Monthly:**  
+- Backup your settings folder
+- Review and optimize field rotation
+- Update planter strategy if needed
+- Check for Bee Swarm Simulator updates
+</Info>
+
+### Backup Your Settings
+
+```
+1. Close Natro Macro
+2. Copy entire `settings` folder
+3. Paste to safe location (Desktop, Cloud)
+4. Label with date: `settings_backup_2024_03_01`
+5. Keep multiple backups
+```
+
+Restore by replacing current settings folder with backup.
+
+## Still Having Issues?
+
+If none of these solutions work:
+
+1. **Fresh Install:**
+   - Backup settings folder
+   - Delete entire Natro Macro folder  
+   - Re-download latest version
+   - Extract to new location
+   - Restore settings
+
+2. **Join Discord:**
+   - https://discord.gg/natromacro
+   - Post in #support with details
+   - Staff and community can help
+
+3. **Report Bug:**
+   - If you found a genuine bug
+   - Post in #bug-reports on Discord
+   - Include steps to reproduce
+   - Provide screenshots/videos
+
+<Warning>
+**Never share:**
+- Your Roblox password
+- Your Roblox cookie  
+- Personal information
+
+Official support will NEVER ask for these!
+</Warning>

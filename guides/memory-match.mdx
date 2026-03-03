@@ -1,0 +1,338 @@
+---
+title: Memory Match Automation
+description: Learn how Natro Macro detects and completes Memory Match games to earn valuable rewards
+---
+
+Memory Match games in Bee Swarm Simulator provide valuable items and rewards. Natro Macro can automatically detect, navigate to, and solve all types of Memory Match games.
+
+## Available Memory Match Types
+
+Natro Macro supports five different Memory Match variations, each with unique cooldowns and rewards:
+
+| Type | Cooldown | Grid Size | Location |
+|------|----------|-----------|----------|
+| **Normal** | 2 hours | 4×4 (16 tiles) | Memory Match Board |
+| **Mega** | 4 hours | 4×4 (16 tiles) | Memory Match Board |
+| **Night** | 8 hours | 4×4 (16 tiles) | Memory Match Board |
+| **Extreme** | 8 hours | 5×4 (20 tiles) | Memory Match Board |
+| **Winter** | 4 hours | 5×4 (20 tiles) | Memory Match Board (Beesmas) |
+
+## Configuration
+
+### Enable Memory Match Types
+
+In the **Collect** tab, you'll find the Memory Match GroupBox with checkboxes for each type:
+
+<Steps>
+  <Step title="Select Match Types">
+    Enable the Memory Match types you want to collect:
+    - **Normal Memory Match** - Basic version, available every 2 hours
+    - **Mega Memory Match** - Medium difficulty, 4 hour cooldown
+    - **Night Memory Match** - Special night-only version, 8 hour cooldown
+    - **Extreme Memory Match** - Hardest version with 20 tiles, 8 hour cooldown
+    - **Winter Memory Match** - Seasonal Beesmas event (when active)
+  </Step>
+
+  <Step title="Configure Options">
+    Click the **Options** button to customize:
+    - **Allow Gather Interrupt** - Lets the macro interrupt gathering to collect Memory Match when it's available
+    - **Item Ignore Settings** - Choose which rewards to skip during matching
+  </Step>
+</Steps>
+
+### Item Ignore Options
+
+The Memory Match Options menu allows you to ignore specific items during matching. This is useful for prioritizing valuable rewards:
+
+```ahk
+; Configuration stored in nm_config.ini
+[Collect]
+NormalMemoryMatchCheck=1
+MegaMemoryMatchCheck=1
+NightMemoryMatchCheck=1
+ExtremeMemoryMatchCheck=1
+MemoryMatchInterruptCheck=1
+
+; Item ignore flags (binary per game type)
+MicroConverterMatchIgnore=0
+TicketMatchIgnore=0
+GlitterMatchIgnore=0
+```
+
+<Note>
+Each item has specific game availability. For example, Cloud Vials only appear in Extreme Memory Match, while Treats appear in all five types.
+</Note>
+
+## How It Works
+
+### Detection System
+
+The macro checks Memory Match availability based on:
+
+1. **Enabled Status** - The corresponding checkbox must be checked in GUI
+2. **Cooldown Timer** - Each type has a specific cooldown period
+3. **Time Since Last Collection** - Tracked in configuration file
+4. **Night Detection** - Night Memory Match requires nighttime (6 PM - 6 AM in-game)
+
+```ahk
+; Memory Match cooldowns (from memorymatch.ahk:5-10)
+MemoryMatchGames := Map(
+    "Winter", {bit: 16, cooldown: 14400},    ; 4 hours
+    "Extreme", {bit: 8, cooldown: 28800},   ; 8 hours
+    "Night", {bit: 4, cooldown: 28800},     ; 8 hours
+    "Mega", {bit: 2, cooldown: 14400},      ; 4 hours
+    "Normal", {bit: 1, cooldown: 7200}      ; 2 hours
+)
+```
+
+### Travel and Access
+
+<Steps>
+  <Step title="Reset Position">
+    The macro resets your character position (returns to hive)
+    
+    <Note>Night Memory Match skips the reset to preserve darkness buffs</Note>
+  </Step>
+
+  <Step title="Navigate to Board">
+    Uses the `nm_GoToCollect()` function with the appropriate path:
+    - `normalmm` - Normal Memory Match
+    - `megamm` - Mega Memory Match
+    - `nightmm` - Night Memory Match
+    - `extrememm` - Extreme Memory Match
+    - `wintermm` - Winter Memory Match
+  </Step>
+
+  <Step title="Confirm Detection">
+    The macro searches for the "E" button prompt to verify the board is accessible
+    
+    If not found on first attempt, it will retry once more
+  </Step>
+
+  <Step title="Activate Board">
+    Presses the **E** key to open the Memory Match interface
+  </Step>
+</Steps>
+
+### Solving Algorithm
+
+The macro uses an intelligent solving system:
+
+#### 1. Grid Detection
+
+Detects game type by checking the title width:
+- **4×4 Grid** (Normal/Mega/Night): 16 tiles, no X offset
+- **5×4 Grid** (Extreme/Winter): 20 tiles, 40px X offset
+
+#### 2. Tile Matching Process
+
+<Steps>
+  <Step title="First Click">
+    - Compares previously stored tiles to find known matches
+    - If no match found, selects a random unclaimed tile
+    - Captures the revealed item as a bitmap
+  </Step>
+
+  <Step title="Second Click">
+    - Searches all stored tiles for a match with first click
+    - If match found, clicks the matching tile
+    - If no match, selects another random tile
+  </Step>
+
+  <Step title="Repeat">
+    Continues until all 8 pairs are matched or chances run out
+  </Step>
+</Steps>
+
+#### 3. Item Priority System
+
+The macro can ignore specific items based on your settings:
+
+```ahk
+; Example from natro_macro.ahk:13014
+if ((MemoryMatchGame && (%item%MatchIgnore & MemoryMatchGames[MemoryMatchGame].bit)) 
+    || (!MemoryMatchGame && (%item%MatchIgnore = data.games))) {
+    IgnoreitemOAC[Tile] := 1  ; Skip this tile
+}
+```
+
+<Warning>
+Ignored items will not be matched, reducing your chances of completing the game successfully. Only ignore items you don't need.
+</Warning>
+
+#### 4. Chance Tracking
+
+The game provides 8 chances (16 clicks). The macro:
+- Monitors remaining chances by checking the UI
+- On the last chance, it will attempt any tile (including previously ignored items)
+- Uses a 500ms delay between clicks to compensate for lag
+
+## Special Features
+
+### Night Memory Match Handling
+
+Night Memory Match has unique behavior:
+
+- **No Reset on Travel** - Preserves night-time buffs and darkness bonuses
+- **Night Time Detection** - Only runs between 6 PM - 6 AM in-game
+- **Same Solving Algorithm** - Uses standard 4×4 grid logic
+
+```ahk
+; From natro_macro.ahk:12806-12807
+nm_reset(MemoryMatchGame = "Night" ? 0 : 1, 0, 0)
+nm_SetStatus("Traveling", MemoryMatchGame " Memory Match")
+```
+
+### Gather Interruption
+
+When enabled, Memory Match can interrupt gathering:
+
+```ahk
+; From natro_macro.ahk:10642-10646
+return ((MemoryMatchInterruptCheck = 1)
+    && ((NormalMemoryMatchCheck && (now-LastNormalMemoryMatch)>7200)
+    || (MegaMemoryMatchCheck && (now-LastMegaMemoryMatch)>14400)
+    || (ExtremeMemoryMatchCheck && (now-LastExtremeMemoryMatch)>28800)
+    || ((beesmasActive = 1) && WinterMemoryMatchCheck && (now-LastWinterMemoryMatch)>14400))
+```
+
+The macro checks during:
+- Field gathering loops
+- Boss kill routines  
+- Other collection activities
+
+<Tip>
+Enable this option to maximize Memory Match collections, especially for shorter cooldown types like Normal (2 hours).
+</Tip>
+
+## Rewards by Type
+
+Different Memory Match types offer different reward pools:
+
+### All Types (Normal, Mega, Night, Extreme, Winter)
+- Treats
+- Tickets
+- Micro-Converters
+- Magic Beans
+- Glitter
+
+### Most Types (excluding Winter/Extreme)
+- Sunflower Seeds
+- Blueberries  
+- Strawberries
+- Pineapples
+- Royal Jellies
+
+### Advanced Types (Extreme, Winter, Night, Mega)
+- Gumdrops
+- Jelly Beans
+- Tropical Drinks
+- Star Jellies
+
+### Extreme/Winter Exclusive
+- Cloud Vials (Extreme only)
+- Soft Wax, Hard Wax, Swirled Wax (Winter only)
+- Honeysuckles, Super Smoothies, Smooth Dice (Winter only)
+- Neonberries, Gingerbread Bears (Winter only)
+
+<Note>
+Refer to `lib/data/memorymatch.ahk` for the complete reward table showing which items appear in each game type.
+</Note>
+
+## Best Practices
+
+<Tip>
+**Maximize Collections**
+- Enable all available Memory Match types
+- Turn on "Allow Gather Interrupt" for frequent checks
+- Only ignore items you genuinely don't need
+</Tip>
+
+<Tip>
+**Timing Optimization**  
+- Normal (2h) and Mega (4h) can be collected multiple times per day
+- Night (8h) should be collected during darkness when your macro runs at night
+- Extreme (8h) provides the most valuable rewards but requires longer waits
+</Tip>
+
+<Tip>
+**Ignore Settings**
+- Start with no ignored items to see what you receive
+- Gradually ignore common items (Treats, Sunflower Seeds) if needed
+- Never ignore rare items (Cloud Vials, Star Jellies, Glitter)
+</Tip>
+
+## Troubleshooting
+
+### Memory Match Not Detected
+
+- Verify the checkbox is enabled in the Collect tab
+- Check the cooldown timer - it may not be ready yet
+- Ensure your character can access the Memory Match location
+- Night Memory Match only works during in-game nighttime
+
+### Wrong Items Matched
+
+- Review your Item Ignore settings in the Options menu
+- Ensure you haven't ignored too many items (reduces chances)
+- The macro will match ignored items on the final chance
+
+### Failed to Complete
+
+- Memory Match uses image recognition which can fail due to lag
+- The macro allows 2 attempts before moving on
+- Check your ping/connection quality to Roblox
+- Consider reducing other background processes
+
+### Timer Not Updating
+
+- Timers are stored in `settings/nm_config.ini` under `[Collect]`
+- Each type has a `Last[Type]MemoryMatch` timestamp
+- If stuck, you can manually edit the timestamp value
+
+<Warning>
+Manually editing timestamps can cause the macro to skip collections or attempt too early. Only modify if necessary.
+</Warning>
+
+## Configuration Reference
+
+### Config File Location
+`settings/nm_config.ini`
+
+### Memory Match Settings
+
+```ini
+[Collect]
+; Enable/disable each type (0=off, 1=on)
+NormalMemoryMatchCheck=1
+MegaMemoryMatchCheck=1  
+NightMemoryMatchCheck=1
+ExtremeMemoryMatchCheck=1
+WinterMemoryMatchCheck=1
+
+; Allow interruption of gathering
+MemoryMatchInterruptCheck=1
+
+; Last collection timestamps (Unix time)
+LastNormalMemoryMatch=1234567890
+LastMegaMemoryMatch=1234567890
+LastNightMemoryMatch=1234567890  
+LastExtremeMemoryMatch=1234567890
+LastWinterMemoryMatch=1234567890
+
+; Item ignore flags (binary values)
+MicroConverterMatchIgnore=0
+TreatMatchIgnore=0
+TicketMatchIgnore=0
+; ... (see full list in GUI Options)
+```
+
+### GUI Controls
+
+From `natro_macro.ahk:2993-2999`:
+- `NormalMemoryMatchCheck` - Checkbox for Normal Memory Match
+- `MegaMemoryMatchCheck` - Checkbox for Mega Memory Match  
+- `NightMemoryMatchCheck` - Checkbox for Night Memory Match
+- `ExtremeMemoryMatchCheck` - Checkbox for Extreme Memory Match
+- `WinterMemoryMatchCheck` - Checkbox for Winter Memory Match (Beesmas only)
+- `MemoryMatchOptions` - Button to open ignore settings

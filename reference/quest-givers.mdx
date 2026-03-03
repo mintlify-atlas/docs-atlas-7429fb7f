@@ -1,0 +1,283 @@
+---
+title: Quest Givers
+description: Complete reference for all quest givers in Bee Swarm Simulator, including quest types, cooldowns, and progress tracking
+---
+
+## Overview
+
+Quest givers provide quests that reward honey, items, and progression unlocks. The macro can automatically detect, accept, and complete quests from all six quest givers.
+
+## Quest Givers
+
+<CardGroup cols={2}>
+  <Card title="Black Bear" icon="paw">
+    **Location:** Starter area  
+    **Cooldown:** 1 hour (3600 seconds)  
+    **Quest Types:** Basic gathering quests  
+    
+    Black Bear offers beginner-friendly quests focused on pollen collection and basic tasks. Great for new players.
+    
+    **Tracking:** `LastBlackQuest` - Unix timestamp of last completed quest
+  </Card>
+
+  <Card title="Brown Bear" icon="paw">
+    **Location:** Starter area  
+    **Cooldown:** 1 hour (3600 seconds)  
+    **Quest Types:** Mixed gathering and combat quests  
+    
+    Brown Bear provides intermediate quests with varied objectives including gathering, mob kills, and collection tasks.
+    
+    **Tracking:** `LastBrownQuest` - Unix timestamp of last completed quest
+  </Card>
+
+  <Card title="Polar Bear" icon="snowflake">
+    **Location:** Mid-game area  
+    **Cooldown:** None (always available)  
+    **Quest Types:** Advanced gathering and mob quests  
+    
+    Polar Bear offers challenging quests with higher rewards. Supports gather interrupt for time-sensitive objectives.
+    
+    **Tracking:** `PolarQuestProgress` - Current quest progress status
+  </Card>
+
+  <Card title="Honey Bee" icon="honey-pot">
+    **Location:** Near hive  
+    **Cooldown:** None (always available)  
+    **Quest Types:** Tutorial and basic quests  
+    
+    Honey Bee provides tutorial quests and simple objectives for new players.
+    
+    **Tracking:** `HoneyQuestProgress` - Current quest progress status
+  </Card>
+
+  <Card title="Bucko Bee" icon="b">
+    **Location:** Blue Flower Field area  
+    **Cooldown:** None (always available)  
+    **Quest Types:** Blue field and blue mob quests  
+    
+    Bucko Bee focuses on blue-themed objectives including blue field gathering and blue mob combat.
+    
+    **Tracking:** `BuckoQuestProgress` - Current quest progress status  
+    **Dependency:** Requires Ant Pass enabled for optimal completion
+  </Card>
+
+  <Card title="Riley Bee" icon="r">
+    **Location:** Red Field area  
+    **Cooldown:** None (always available)  
+    **Quest Types:** Red field and red mob quests  
+    
+    Riley Bee focuses on red-themed objectives including red field gathering and red mob combat.
+    
+    **Tracking:** `RileyQuestProgress` - Current quest progress status  
+    **Dependency:** Requires Ant Pass enabled for optimal completion
+  </Card>
+</CardGroup>
+
+## Quest Configuration
+
+Each quest giver has configurable options in the macro:
+
+### Enable/Disable Quests
+
+```ini
+[Quests]
+PolarQuestCheck=0
+PolarQuestGatherInterruptCheck=1
+HoneyQuestCheck=0
+BlackQuestCheck=0
+LastBlackQuest=1
+BrownQuestCheck=0  
+LastBrownQuest=1
+BuckoQuestCheck=0
+BuckoQuestGatherInterruptCheck=1
+RileyQuestCheck=0
+RileyQuestGatherInterruptCheck=1
+```
+
+### Quest Check Variables
+
+| Variable | Type | Description |
+|----------|------|-------------|
+| `[Name]QuestCheck` | Boolean | Enable/disable the quest giver (0=off, 1=on) |
+| `[Name]QuestProgress` | String | Current progress displayed in GUI |
+| `[Name]QuestComplete` | Boolean | Whether current quest is completed |
+| `Last[Name]Quest` | Integer | Unix timestamp of last quest completion |
+| `[Name]QuestGatherInterruptCheck` | Boolean | Allow interrupting gathering for quests |
+
+## Quest Types & Objectives
+
+<AccordionGroup>
+  <Accordion title="Gathering Quests">
+    Require collecting specific amounts of pollen from designated fields.
+    
+    - **Single Field**: Gather X pollen from one specific field
+    - **Multi Field**: Gather from multiple fields
+    - **Any Field**: Gather any type of pollen
+    
+    The macro automatically navigates to required fields when quest gathering is active.
+  </Accordion>
+
+  <Accordion title="Mob Combat Quests">
+    Require defeating specific mobs and collecting tokens.
+    
+    **Common Mobs:**
+    - Ladybugs
+    - Rhino Beetles  
+    - Spider
+    - Mantis
+    - Scorpions
+    - Werewolf
+    
+    Gather interrupt allows the macro to prioritize mob objectives during farming.
+  </Accordion>
+
+  <Accordion title="Collection Quests">
+    Require collecting items from dispensers, machines, or world objects.
+    
+    Examples:
+    - Collect from specific dispensers
+    - Use the blender
+    - Collect from stockings/wreath (seasonal)
+  </Accordion>
+
+  <Accordion title="Special Quests">
+    Unique objectives that may require manual intervention.
+    
+    These quests may need specific items, level requirements, or one-time actions that the macro cannot fully automate.
+  </Accordion>
+</AccordionGroup>
+
+## Quest Rotation System
+
+The macro uses a rotation system to efficiently complete multiple quests:
+
+```ahk
+nm_QuestRotation() {
+    ; Check quest priority order
+    nm_PolarQuest()     ; Highest priority
+    
+    if (RotateQuest = "Black") {
+        nm_BlackQuest()
+        if (BlackQuestCheck=0 || (BlackQuestComplete && (nowUnix()-LastBlackQuest)<3600)) {
+            nm_BuckoQuest()
+            if (BuckoQuestCheck=0 || BuckoQuestComplete=2) {
+                nm_RileyQuest()
+            }
+        }
+    } else {
+        nm_BrownQuest()
+    }
+    
+    nm_HoneyQuest()     ; Lowest priority
+}
+```
+
+## Quest Progress Tracking
+
+Progress is tracked in multiple ways:
+
+### GUI Display
+
+The macro GUI shows current quest progress for each active quest giver:
+
+```ahk
+MainGui.Add("Text", "vPolarQuestProgress", 
+    StrReplace(PolarQuestProgress, "|", "`n"))
+```
+
+Progress strings use `|` as delimiter for multi-line display.
+
+### Quest Cooldowns
+
+Black Bear and Brown Bear have 1-hour cooldowns:
+
+```ahk
+; Check if 1 hour (3600 seconds) has passed since last quest
+if (BlackQuestComplete && (nowUnix()-LastBlackQuest)>3600) {
+    ; Quest available again
+    LastBlackQuest := nowUnix()
+    IniWrite LastBlackQuest, "settings\nm_config.ini", "Quests", "LastBlackQuest"
+}
+```
+
+### Session Tracking
+
+The macro tracks total quests completed:
+
+- `TotalQuestsComplete` - All-time quest count
+- `SessionQuestsComplete` - Quests completed in current session
+
+## Gather Interrupt Feature
+
+<Info>
+Gather interrupt allows the macro to temporarily stop gathering to complete time-sensitive quest objectives.
+</Info>
+
+Supported for:
+- **Polar Bear** - `PolarQuestGatherInterruptCheck`
+- **Bucko Bee** - `BuckoQuestGatherInterruptCheck`  
+- **Riley Bee** - `RileyQuestGatherInterruptCheck`
+
+### When Gather Interrupt Activates
+
+```ahk
+; Example: Interrupt for Ladybug kills
+if (PolarQuestCheck && PolarQuestGatherInterruptCheck && QuestLadybugs)
+    || (RileyQuestCheck && RileyQuestGatherInterruptCheck && RileyLadybugs)
+{
+    ; Stop gathering and hunt ladybugs
+}
+```
+
+## Path Files
+
+Quest giver paths are stored in the `paths` directory:
+
+- **gtq-black.ahk** - Go to Black Bear
+- **gtq-brown.ahk** - Go to Brown Bear  
+- **gtq-polar.ahk** - Go to Polar Bear
+- **gtq-honey.ahk** - Go to Honey Bee
+- **gtq-bucko.ahk** - Go to Bucko Bee
+- **gtq-riley.ahk** - Go to Riley Bee
+
+## Dependencies
+
+<Warning>
+Bucko and Riley quests often require mob kills that depend on Ant Pass being enabled for efficient completion.
+</Warning>
+
+The macro will warn you if quest givers are enabled without required dependencies:
+
+```ahk
+if ((BuckoQuestCheck = 1) && (AntPassCheck = 0)) {
+    ; Show warning about Ant Pass dependency
+}
+```
+
+## Best Practices
+
+<Steps>
+  <Step title="Enable Quest Givers Progressively">
+    Start with Black Bear and Brown Bear, then add Polar, Bucko, and Riley as you progress.
+  </Step>
+  
+  <Step title="Configure Gather Interrupt Carefully">
+    Only enable gather interrupt for quest givers you actively need. Excessive interrupts can reduce farming efficiency.
+  </Step>
+  
+  <Step title="Monitor Quest Progress">
+    Check the GUI regularly to ensure quests are progressing. Some quests may require manual intervention.
+  </Step>
+  
+  <Step title="Optimize Quest Rotation">
+    Use the `RotateQuest` setting to alternate between Black and Brown Bear quests for maximum efficiency.
+  </Step>
+</Steps>
+
+## Related Configuration
+
+See the [Configuration Guide](/configuration/settings) for quest-related settings:
+- Quest enable/disable toggles
+- Gather interrupt options
+- Quest field priorities  
+- Quest rotation settings

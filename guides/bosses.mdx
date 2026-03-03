@@ -1,9 +1,9 @@
 ---
-title: Boss Farming Guide  
-description: Configure Natro Macro to automatically farm bosses including Tunnel Bear, King Beetle, Stump Snail, Coco Crab, and Commando Chick
+title: Boss & Bug Farming Guide  
+description: Configure Natro Macro to automatically farm bosses and bugs including Tunnel Bear, King Beetle, Vicious Bee, Mondo Chick, and Bug Runs
 ---
 
-Boss farming is essential for obtaining rare items, completing quests, and progressing in Bee Swarm Simulator. Natro Macro automates the detection, travel, combat, and looting of all major bosses.
+Boss and bug farming is essential for obtaining rare items, completing quests, and progressing in Bee Swarm Simulator. Natro Macro automates the detection, travel, combat, and looting of all major bosses and bugs.
 
 ## Available Bosses
 
@@ -556,3 +556,200 @@ IniWrite SessionBossKills, "settings\nm_config.ini", "Status", "SessionBossKills
 <Note>
 View statistics in the Status tab or through Discord integration if enabled.
 </Note>
+
+## Vicious Bee (Stingers)
+
+Vicious Bee spawns in certain fields and attacks your character. Killing it drops stingers which are valuable for crafting.
+
+### Available Fields
+
+Vicious Bee can spawn in these fields:
+
+- **Clover Field**
+- **Spider Field**  
+- **Cactus Field**
+- **Rose Field**
+- **Mountain Top Field**
+- **Pepper Patch**
+
+### Configuration
+
+Located in the **Collect/Kill** tab under **Stingers GroupBox**:
+
+```ini
+[Collect]
+StingerCheck=1                  ; Enable/disable Vicious Bee farming
+StingerDailyBonusCheck=0       ; Only kill for daily bonus
+StingerCloverCheck=1           ; Enable Clover Field
+StingerSpiderCheck=1           ; Enable Spider Field  
+StingerCactusCheck=1           ; Enable Cactus Field
+StingerRoseCheck=1             ; Enable Rose Field
+StingerMountainTopCheck=1      ; Enable Mountain Top Field
+StingerPepperCheck=1           ; Enable Pepper Patch
+StingerMatchIgnore=0           ; Ignore during Memory Match
+```
+
+### How It Works
+
+<Steps>
+  <Step title="Detection">
+    While gathering in enabled fields, the macro detects Vicious Bee spawns
+  </Step>
+
+  <Step title="Combat">
+    - Stays in the field
+    - Dodges attacks while dealing damage
+    - Monitors for Vicious Bee death
+  </Step>
+
+  <Step title="Loot">
+    Collects stingers and other drops automatically
+  </Step>
+</Steps>
+
+<Info>
+**Daily Bonus Mode:** When enabled, only kills Vicious Bee once per day for the bonus reward. Ignores subsequent spawns until daily reset.
+</Info>
+
+## Bug Runs
+
+Bug Runs involve traveling to specific locations to kill groups of bugs for loot and quest completion.
+
+### Available Bug Types
+
+| Bug Type | Levels | Location | Respawn |
+|----------|--------|----------|---------|
+| **Ladybugs** | Multiple | Mushroom Field, Strawberry Field, Clover Field | Variable |
+| **Rhinoceros Beetles** | Multiple | Clover Field | Variable |
+| **Mantis** | Multiple | Pine Tree Forest | Variable |
+| **Scorpions** | Multiple | Rose Field, Cactus Field | Variable |
+| **Werewolf** | High level | Various | Variable |
+
+### Configuration
+
+Located in the **Collect/Kill** tab under **Bug Run GroupBox**:
+
+```ini
+[Collect]
+BugrunLadybugsCheck=1          ; Enable Ladybug runs
+BugrunLadybugsLoot=1           ; Collect loot from Ladybugs
+LastBugrunLadybugs=1234567890  ; Last run timestamp
+
+BugrunMantisCheck=1            ; Enable Mantis runs
+BugrunMantisLoot=1             ; Collect loot from Mantis
+LastBugrunMantis=1234567890    ; Last run timestamp
+
+BugrunScorpionsCheck=1         ; Enable Scorpion runs
+BugrunScorpionsLoot=1          ; Collect loot from Scorpions
+LastBugrunScorpions=1234567890 ; Last run timestamp
+
+BugrunWerewolfCheck=1          ; Enable Werewolf runs
+BugrunWerewolfLoot=1           ; Collect loot from Werewolf
+LastBugrunWerewolf=1234567890  ; Last run timestamp
+```
+
+### How Bug Runs Work
+
+<Steps>
+  <Step title="Schedule Check">
+    Macro checks if enough time has passed since last bug run
+  </Step>
+
+  <Step title="Travel">
+    Navigates to the bug location using path files
+  </Step>
+
+  <Step title="Combat">
+    - Engages bugs using movement patterns
+    - Monitors for bug deaths
+    - Continues until all bugs killed or timeout
+  </Step>
+
+  <Step title="Loot Collection">
+    If loot option enabled, collects drops before returning
+  </Step>
+</Steps>
+
+<Tip>
+Enable loot collection for valuable drops like Royal Jelly, tickets, and quest items. Disable if you only need kill counts for quests.
+</Tip>
+
+## Mondo Chick
+
+Mondo Chick is a special boss that appears during the Beesmas event and certain other times. It provides powerful buffs.
+
+### Modes
+
+**Buff Mode (Default):**
+- Travels to Mondo Chick when it spawns
+- Waits near it to receive buffs
+- Does NOT attack
+
+**Kill Mode:**
+- Attacks Mondo Chick to defeat it
+- Collects loot after kill
+- Requires strong hive
+
+### Configuration
+
+```ini
+[Collect]
+MondoBuffCheck=1               ; Enable Mondo Chick interaction
+MondoAction="Buff"            ; "Buff" or "Kill"
+MondoLootDirection="Random"   ; Loot collection direction
+MondoSecs=120                 ; Time to wait for buff (seconds)
+LastMondoBuff=1234567890      ; Last Mondo interaction timestamp
+```
+
+### Mondo Buff Strategy
+
+<Steps>
+  <Step title="Detection">
+    Macro detects Mondo Chick spawn announcement
+  </Step>
+
+  <Step title="Travel">
+    Immediately travels to Mondo location
+  </Step>
+
+  <Step title="Buff Collection">
+    - Waits near Mondo Chick
+    - Collects buffs as they appear
+    - Duration: `MondoSecs` setting (default 120s = 2 minutes)
+  </Step>
+
+  <Step title="Return">
+    Returns to previous activity after buff collection complete
+  </Step>
+</Steps>
+
+<Warning>
+**Kill Mode** requires a very strong hive. Most players should use Buff mode to benefit from Mondo's powerful buffs without risking failure.
+</Warning>
+
+<Info>
+Mondo Chick buffs include:
+- Mondo Blessing (capacity, pollen, convert rate)
+- Red Extract
+- Blue Extract  
+- Other temporary bonuses
+</Info>
+
+## Statistics & Tracking
+
+All boss and bug kills are tracked:
+
+```ini
+[Status]
+TotalBossKills=150             ; All-time boss kills
+SessionBossKills=5             ; Current session boss kills
+TotalBugKills=500              ; All-time bug kills
+SessionBugKills=12             ; Current session bug kills
+TotalPlantersCollected=200     ; Includes bug run planters
+SessionPlantersCollected=3     ; Current session planters
+```
+
+View detailed statistics in:
+- **Status Tab** in the GUI
+- **Discord Integration** (if enabled)
+- **StatMonitor.ahk** window (if displayed)
